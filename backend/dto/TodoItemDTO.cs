@@ -25,5 +25,17 @@ namespace ToDoApp.dto
                 Technologies = technologies;
             }
         }
+
+        public class TodoItemWithProjectIdDTO
+        {
+            public TodoItemDTO Item { get; set; }
+            public int ProjectId { get; set; }
+
+            public TodoItemWithProjectIdDTO(TodoItemDTO todoItemDTO, int projectId)
+            {
+                Item = todoItemDTO;
+                ProjectId = projectId;
+            }
+        }
     }
 }

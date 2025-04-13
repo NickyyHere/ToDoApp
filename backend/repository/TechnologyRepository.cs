@@ -1,5 +1,5 @@
+using Microsoft.EntityFrameworkCore;
 using ToDoApp.models.Technology;
-using ToDoApp.models.TodoItem;
 using ToDoApp.repository.dbcontext.AppDbContext;
 using ToDoApp.repository.interfaces.ITechnologyRepository;
 
@@ -14,29 +14,41 @@ namespace ToDoApp.repository
             {
                 _context = context;
             }
-            public Task AddAsync(Technology technology)
+
+            public async Task AddAsync(Technology technology)
             {
-                throw new NotImplementedException();
+                _context.Technologies.Add(technology);
+                await _context.SaveChangesAsync();
             }
 
-            public Task DeleteAsync(int id)
+            public async Task DeleteAsync(int id)
             {
-                throw new NotImplementedException();
+                var item = await _context.Technologies.FindAsync(id);
+                if(item != null)
+                {
+                    _context.Technologies.Remove(item);
+                    await _context.SaveChangesAsync();
+                }
             }
 
-            public Task<List<TodoItem>> GetAllAsync()
+            public async Task<List<Technology>> GetAllAsync()
             {
-                throw new NotImplementedException();
+                return await _context.Technologies.ToListAsync();
             }
 
-            public Task<TodoItem> GetByIdAsync()
+            public async Task<Technology?> GetByIdAsync(int id)
             {
-                throw new NotImplementedException();
+                return await _context.Technologies.FindAsync(id);
             }
 
-            public Task UpdateAsync(int id, Technology technology)
+            public async Task UpdateAsync(int id, Technology newTechnology)
             {
-                throw new NotImplementedException();
+                var item = await _context.Technologies.FindAsync(id);
+                if(item != null)
+                {
+                    _context.Entry(item).CurrentValues.SetValues(newTechnology);
+                    await _context.SaveChangesAsync();
+                }
             }
         }
     }

@@ -1,6 +1,4 @@
-using ToDoApp.models.Project;
 using ToDoApp.models.Technology;
-using ToDoApp.models.TodoItem;
 
 namespace ToDoApp.repository.interfaces
 {
@@ -8,8 +6,8 @@ namespace ToDoApp.repository.interfaces
     {
         public interface ITechnologyRepository
         {
-            Task<List<TodoItem>> GetAllAsync();
-            Task<TodoItem> GetByIdAsync();
+            Task<List<Technology>> GetAllAsync();
+            Task<Technology?> GetByIdAsync(int id);
             Task AddAsync(Technology technology);
             Task UpdateAsync(int id, Technology technology);
             Task DeleteAsync(int id);

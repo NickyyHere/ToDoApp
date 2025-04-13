@@ -1,5 +1,7 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using ToDoApp.models.TodoItem;
+using ToDoApp.dto.ProjectDTO;
+using ToDoApp.dto.TodoItemDTO;
 using ToDoApp.services.interfaces.ITodoService;
 
 namespace ToDoApp.controllers 
@@ -24,6 +26,20 @@ namespace ToDoApp.controllers
         {
             var projects = await _todoService.GetProjectsAsync();
             return Ok(projects);
+        }
+        [HttpPost("tasks")]
+        public IActionResult AddTask([FromBody] TodoItemWithProjectIdDTO data)
+        {
+            int projectId = data.ProjectId;
+            TodoItemDTO item = data.Item;
+            _todoService.AddTodoItemAsync(item, projectId);
+            return Ok();
+        }
+        [HttpPost("projects")]
+        public async Task<IActionResult> AddProject([FromBody] ProjectDTO projectDTO)
+        {
+            await _todoService.AddProjectAsync(projectDTO);
+            return Ok();
         }
     }
 }

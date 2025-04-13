@@ -9,7 +9,7 @@ namespace ToDoApp.services.interfaces
         public interface ITodoService
         {
             Task<List<TodoItemDTO>> GetTodoItemsAsync();
-            Task AddTodoItemAsync(TodoItemDTO itemDTO);
+            Task AddTodoItemAsync(TodoItemDTO itemDTO, int projectId);
             Task<List<object>> GetProjectsAsync();
             Task AddProjectAsync(ProjectDTO projectDTO);
             

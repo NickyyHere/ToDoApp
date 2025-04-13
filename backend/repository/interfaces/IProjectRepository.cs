@@ -1,5 +1,4 @@
 using ToDoApp.models.Project;
-using ToDoApp.models.TodoItem;
 
 namespace ToDoApp.repository.interfaces
 {
@@ -7,8 +6,8 @@ namespace ToDoApp.repository.interfaces
     {
         public interface IProjectRepository
         {
-            Task<List<TodoItem>> GetAllAsync();
-            Task<TodoItem> GetByIdAsync();
+            Task<List<Project>> GetAllAsync();
+            Task<Project?> GetByIdAsync(int id);
             Task AddAsync(Project project);
             Task UpdateAsync(int id, Project project);
             Task DeleteAsync(int id);

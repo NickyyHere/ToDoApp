@@ -1,5 +1,5 @@
+using Microsoft.EntityFrameworkCore;
 using ToDoApp.models.Project;
-using ToDoApp.models.TodoItem;
 using ToDoApp.repository.dbcontext.AppDbContext;
 using ToDoApp.repository.interfaces.IProjectRepository;
 
@@ -14,29 +14,41 @@ namespace ToDoApp.repository
             {
                 _context = context;
             }
-            public Task AddAsync(Project project)
+
+            public async Task AddAsync(Project project)
             {
-                throw new NotImplementedException();
+                _context.Projects.Add(project);
+                await _context.SaveChangesAsync();
             }
 
-            public Task DeleteAsync(int id)
+            public async Task DeleteAsync(int id)
             {
-                throw new NotImplementedException();
+                var project = await _context.Projects.FindAsync(id);
+                if(project != null)
+                {
+                    _context.Projects.Remove(project);
+                    await _context.SaveChangesAsync();
+                }
             }
 
-            public Task<List<TodoItem>> GetAllAsync()
+            public async Task<List<Project>> GetAllAsync()
             {
-                throw new NotImplementedException();
+                return await _context.Projects.ToListAsync();
             }
 
-            public Task<TodoItem> GetByIdAsync()
+            public async Task<Project?> GetByIdAsync(int id)
             {
-                throw new NotImplementedException();
+                return await _context.Projects.FindAsync(id);
             }
 
-            public Task UpdateAsync(int id, Project project)
+            public async Task UpdateAsync(int id, Project newProject)
             {
-                throw new NotImplementedException();
+                var item = await _context.Projects.FindAsync(id);
+                if(item != null)
+                {
+                    _context.Entry(item).CurrentValues.SetValues(newProject);
+                    await _context.SaveChangesAsync();
+                }
             }
         }
     }
