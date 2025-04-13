@@ -1,0 +1,429 @@
+:root {
+  --bg-color: #0F172A;
+  --surface-color: #1E293B;
+  --primary-color: #3B82F6;
+  --secondary-color: #94A3B8;
+  --accent-color: #34D399;
+  --text-color: #F8FAFC;
+  --text-muted-color: #CBD5E1;
+  --border-color: #334155;
+
+  --error: rgb(189, 11, 11);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="light"] {
+  /* Light Theme */
+  --bg-color: #F9FAFB;
+  --surface-color: #FFFFFF;
+  --primary-color: #2563EB;
+  --secondary-color: #64748B;
+  --accent-color: #10B981;
+  --text-color: #111827;
+  --text-muted-color: #6B7280;
+  --border-color: #E5E7EB;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  font-family: 'Arial', sans-serif;
+}
+
+body * {
+  margin: 0;
+  padding: 0;
+}
+
+/* 
+  Margins, and paddings
+*/
+
+.margin {
+  margin: var(--margin-value);
+}
+
+.margin-top {
+  margin-top: var(--margin-value);
+}
+
+.margin-bottom {
+  margin-bottom: var(--margin-value);
+}
+
+.margin-left {
+  margin-left: var(--margin-value);
+}
+
+.margin-right {
+  margin-right: var(--margin-value);
+}
+
+.m-0 {
+  --margin-value: 0;
+}
+
+.m-xs {
+  --margin-value: .5rem;
+}
+
+.m-sm {
+  --margin-value: 1rem;
+}
+
+.m-md {
+  --margin-value: 1.5rem;
+}
+
+.m-lg {
+  --margin-value: 2rem;
+}
+
+.m-auto {
+  --margin-value: auto;
+}
+
+.padding {
+  padding: var(--padding-value);
+}
+
+.padding-top {
+  padding-top: var(--padding-value);
+}
+
+.padding-bottom {
+  padding-bottom: var(--padding-value);
+}
+
+.padding-left {
+  padding-left: var(--padding-value);
+}
+
+.padding-right {
+  padding-right: var(--padding-value);
+}
+
+.p-0 {
+  --padding-value: 0;
+}
+
+.p-xs {
+  --padding-value: .5rem;
+}
+
+.p-sm {
+  --padding-value: 1rem;
+}
+
+.p-md {
+  --padding-value: 1.5rem;
+}
+
+.p-lg {
+  --padding-value: 2rem;
+}
+
+/*
+  Positions
+*/
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.sticky {
+  position: sticky;
+}
+
+/*
+  Elemement positioning
+*/
+
+.absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+}
+
+/*
+  Displays
+*/
+
+.block {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.flex {
+  display: flex;
+}
+
+/*
+  Flex
+*/
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-space-between {
+  justify-content: space-between;
+}
+
+.justify-space-around {
+  justify-content: space-around;
+}
+
+.justify-space-evenly {
+  justify-content: space-evenly;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.align-start {
+  align-items: flex-start;
+}
+
+.align-end {
+  align-items: flex-end;
+}
+
+.align-stretch {
+  align-items: stretch;
+}
+
+.align-base {
+  align-items: baseline;
+}
+
+.direction-row {
+  flex-direction: row;
+}
+
+.direction-col {
+  flex-direction: column;
+}
+
+.gap-xs {
+  gap: .25rem;
+}
+
+.gap-sm {
+  gap: .5rem;
+}
+
+.gap-md {
+  gap: 0.75rem;
+}
+
+.gap-lg {
+  gap: 1rem;
+}
+
+.gap-xl {
+  gap: 1.5rem;
+}
+
+.gap-xxl {
+  gap: 2rem;
+}
+
+.grow-1 {
+  flex-grow: 1;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+/*
+  Text
+*/
+
+.text-center {
+  text-align: center;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-rigth {
+  text-align: right;
+}
+
+.text-bold {
+  font-weight: bold;
+}
+
+.font-xs {
+  font-size: .5rem;
+}
+
+.font-sm {
+  font-size: .75rem;
+}
+
+.font-lg {
+  font-size: 1.25rem;
+}
+
+.font-xl {
+  font-size: 1.5rem;
+}
+
+.font-xxl {
+  font-size: 2rem;
+}
+
+.text-color-primary {
+  color: var(--text-color);
+}
+
+.text-color-muted {
+  color: var(--text-muted-color);
+}
+
+h1 {
+  font-size: 5rem;
+}
+
+h2 {
+  font-size: 3.5rem;
+}
+
+h3 {
+  font-size: 2.5rem;
+}
+
+/*
+  Widths
+*/
+
+.width-100 {
+  width: 100%;
+}
+
+.width-90 {
+  width: 90%;
+}
+
+.width-75 {
+  width: 75%;
+}
+
+.width-50 {
+  width: 50%;
+}
+
+.width-40 {
+  width: 40%;
+}
+
+.width-33 {
+  width: 33.33%;
+}
+
+.width-25 {
+  width: 25%;
+}
+
+/*
+  Background, colors, etc
+*/
+
+.bg-surface {
+  background-color: var(--surface-color);
+}
+
+.bg-accent {
+  background-color: var(--accent-color);
+}
+
+.bg-primary {
+  background-color: var(--bg-color);
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: .5s;
+}
+
+a:hover {
+  color: var(--secondary-color);
+}
+
+.font-error {
+  color: var(--error);
+}
+
+/*
+  Border
+*/
+
+.border {
+  border: var(--border, 1px) solid var(--border-color);
+}
+
+.border-thick {
+  border-width: 2px;
+}
+
+.border-thicker {
+  border-width: 3px;
+}
+
+.border-dashed {
+  border-style: dashed;
+}
+
+.border-dotted {
+  border-style: dotted;
+}
+
+.rounded {
+  border-radius: 10px;
+}
+
+.round {
+  border-radius: 50px;
+}
