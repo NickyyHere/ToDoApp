@@ -1,41 +1,35 @@
-using ToDoApp.enumerable.Status;
-using ToDoApp.models.Technology;
+using ToDoApp.enumerable;
+using ToDoApp.models;
 
 namespace ToDoApp.dto
 {
-    namespace TodoItemDTO
+    public class TodoItemDTO
     {
-        public class TodoItemDTO
-        {
-            public string ProjectName { get; set; }
-            public string Name { get; set; }
-            public string Description { get; set; }
-            public Status Status { get; set; }
-            public DateTime StartDate { get; set; }
-            public DateTime? FinishDate { get; set; }
-            public ICollection<Technology> Technologies { get; set; }
+        public int Id { get; set; }
+        public string ProjectName { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public Status Status { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime? FinishDate { get; set; }
+        public ICollection<Technology> Technologies { get; set; }
 
-            public TodoItemDTO(string projectName, string name, string description, Status status, ICollection<Technology> technologies, DateTime startDate, DateTime? finishDate = null) {
-                ProjectName = projectName;
-                Name = name;
-                Description = description;
-                Status = status;
-                StartDate = startDate;
-                FinishDate = finishDate;
-                Technologies = technologies;
-            }
+        public TodoItemDTO(int id, string projectName, string name, string description, Status status, ICollection<Technology> technologies, DateTime startDate, DateTime? finishDate = null) {
+            Id = id;
+            ProjectName = projectName;
+            Name = name;
+            Description = description;
+            Status = status;
+            StartDate = startDate;
+            FinishDate = finishDate;
+            Technologies = technologies;
         }
 
-        public class TodoItemWithProjectIdDTO
+        public override string ToString()
         {
-            public TodoItemDTO Item { get; set; }
-            public int ProjectId { get; set; }
-
-            public TodoItemWithProjectIdDTO(TodoItemDTO todoItemDTO, int projectId)
-            {
-                Item = todoItemDTO;
-                ProjectId = projectId;
-            }
+            return 
+            $"Id: {Id}\nProject: {ProjectName}\nName: {Name}\nDescription: {Description}\nStatus: {Status}\nTechnologies: {Technologies}\nStartDate: {StartDate}\nFinishDate: {FinishDate}";
         }
     }
+
 }

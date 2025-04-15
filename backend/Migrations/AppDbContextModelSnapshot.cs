@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using ToDoApp.repository.dbcontext.AppDbContext;
+using ToDoApp.repository.dbcontext;
 
 #nullable disable
 
@@ -22,7 +22,7 @@ namespace ToDoApp.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ToDoApp.models.Project.Project", b =>
+            modelBuilder.Entity("ToDoApp.models.Project", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -58,7 +58,7 @@ namespace ToDoApp.Migrations
                     b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("ToDoApp.models.Technology.Technology", b =>
+            modelBuilder.Entity("ToDoApp.models.Technology", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -71,17 +71,12 @@ namespace ToDoApp.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("Name");
 
-                    b.Property<int?>("TodoItemId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("TodoItemId");
 
                     b.ToTable("Technologies");
                 });
 
-            modelBuilder.Entity("ToDoApp.models.TodoItem.TodoItem", b =>
+            modelBuilder.Entity("ToDoApp.models.TodoItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -122,16 +117,24 @@ namespace ToDoApp.Migrations
                     b.ToTable("TodoItems");
                 });
 
-            modelBuilder.Entity("ToDoApp.models.Technology.Technology", b =>
+            modelBuilder.Entity("ToDoApp.models.TodoTechnology", b =>
                 {
-                    b.HasOne("ToDoApp.models.TodoItem.TodoItem", null)
-                        .WithMany("Technologies")
-                        .HasForeignKey("TodoItemId");
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TechnologyId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ItemId", "TechnologyId");
+
+                    b.HasIndex("TechnologyId");
+
+                    b.ToTable("TodoTechnologies");
                 });
 
-            modelBuilder.Entity("ToDoApp.models.TodoItem.TodoItem", b =>
+            modelBuilder.Entity("ToDoApp.models.TodoItem", b =>
                 {
-                    b.HasOne("ToDoApp.models.Project.Project", "Project")
+                    b.HasOne("ToDoApp.models.Project", "Project")
                         .WithMany()
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -140,7 +143,31 @@ namespace ToDoApp.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("ToDoApp.models.TodoItem.TodoItem", b =>
+            modelBuilder.Entity("ToDoApp.models.TodoTechnology", b =>
+                {
+                    b.HasOne("ToDoApp.models.TodoItem", "Item")
+                        .WithMany("Technologies")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ToDoApp.models.Technology", "Technology")
+                        .WithMany("TodoTechnologies")
+                        .HasForeignKey("TechnologyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Technology");
+                });
+
+            modelBuilder.Entity("ToDoApp.models.Technology", b =>
+                {
+                    b.Navigation("TodoTechnologies");
+                });
+
+            modelBuilder.Entity("ToDoApp.models.TodoItem", b =>
                 {
                     b.Navigation("Technologies");
                 });

@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using ToDoApp.repository.dbcontext.AppDbContext;
+using ToDoApp.repository.dbcontext;
+using ToDoApp.repository.interfaces;
+using ToDoApp.repository;
 using ToDoApp.services.interfaces.ITodoService;
-using ToDoApp.services.TodoService;
+using ToDoApp.services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 AppContext.SetSwitch("Nphsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddScoped<ITodoService, TodoService>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<ITodoRepository, TodoRepository>();
+builder.Services.AddScoped<ITechnologyRepository, TechnologyRepository>();
 
 var app = builder.Build();
 

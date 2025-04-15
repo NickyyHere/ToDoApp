@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using ToDoApp.dto.ProjectDTO;
-using ToDoApp.dto.TodoItemDTO;
+using ToDoApp.dto;
 using ToDoApp.services.interfaces.ITodoService;
 
 namespace ToDoApp.controllers 
@@ -27,18 +26,30 @@ namespace ToDoApp.controllers
             var projects = await _todoService.GetProjectsAsync();
             return Ok(projects);
         }
-        [HttpPost("tasks")]
-        public IActionResult AddTask([FromBody] TodoItemWithProjectIdDTO data)
+        [HttpGet("technologies")]
+        public async Task<IActionResult> GetTechnologiesAsync()
         {
-            int projectId = data.ProjectId;
-            TodoItemDTO item = data.Item;
-            _todoService.AddTodoItemAsync(item, projectId);
+            var technologies = await _todoService.GetTechnologiesAsync();
+            return Ok(technologies);
+        }
+        [HttpPost("tasks/{id}")]
+        public async Task<IActionResult> AddTask([FromBody] TodoItemDTO data, [FromRoute] int id)
+        {
+            int projectId = id;
+            TodoItemDTO item = data;
+            await _todoService.AddTodoItemAsync(item, projectId);
             return Ok();
         }
         [HttpPost("projects")]
         public async Task<IActionResult> AddProject([FromBody] ProjectDTO projectDTO)
         {
             await _todoService.AddProjectAsync(projectDTO);
+            return Ok();
+        }
+        [HttpPost("technologies")]
+        public async Task<IActionResult> AddTechnology([FromBody] string name)
+        {
+            await _todoService.AddTechnologyAsync(name);
             return Ok();
         }
     }

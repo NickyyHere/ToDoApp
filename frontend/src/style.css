@@ -266,13 +266,28 @@ body * {
   flex-grow: 1;
 }
 
+.flex-item {
+  flex: 1;
+}
+
 .wrap {
   flex-wrap: wrap;
 }
 
 /*
+  Grid
+*/
+
+.grid {
+  display: grid;
+}
+
+/*
   Text
 */
+.select-none {
+  user-select: none;
+}
 
 .text-center {
   text-align: center;
@@ -312,6 +327,10 @@ body * {
 
 .font-xxl {
   font-size: 2rem;
+}
+
+.font-res-xs {
+  font-size: 80%;
 }
 
 .text-color-primary {
@@ -426,4 +445,20 @@ a:hover {
 
 .round {
   border-radius: 50px;
+}
+
+/*
+  Custom
+*/
+
+select, input, textarea {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.checkbox {
+  border: 1px solid var(--border-color);
+}
+.checkbox.checked {
+  border: 1px solid var(--accent-color);
 }

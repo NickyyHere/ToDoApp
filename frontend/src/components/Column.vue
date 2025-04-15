@@ -1,49 +1,51 @@
 <script setup lang="ts">
-    import Card from "./Card.vue"
-    import type { CardData } from "../types/CardData"
+import type { ProjectData, TaskData } from '../types/ItemData';
+import Item from './Item.vue';
 
-    const props = defineProps<{title: string, cards: CardData[]}>()
-
-    const emit = defineEmits<{(event: 'card-selected', card: CardData): void}>()
-
-    function sendCard(card: any) 
-    {
-        emit('card-selected', card)
-    }
+    defineProps<{
+        title: string
+        data: TaskData[] | ProjectData[]
+    }>()
 </script>
 <template>
-    <div class="flex direction-col text-center width-100 border border-thicker rounded">
-        <h3 class="margin m-0 padding p-sm" @click="() => {console.log(props)}">
-            {{ title }}
-           <hr> 
-        </h3>
-        <div class="flex justify-center padding p-md wrap gap-sm cards">
-            <Card v-for="card in props.cards"
-                :title = "card.title"
-                :description="card.description"
-                :project="card.project"
-                :start="card.start"
-                :finish="card.finish"
-                :technologies="card.technologies"
-                @send="sendCard"
-            ></Card>
+    <div class="bg-primary flex border border-thick direction-col width-100 wrapper">
+        <div class="bg-primary padding-left padding-right p-sm flex direction-col flex-item container">
+            <h3 class="text-center"> {{ title }} </h3>
+            <hr>
+            <div class="flex-item margin-bottom margin-top m-sm font-xxl items gap-xs">
+                <Item v-for="item in data" :item-data="item"></Item>
+            </div>
         </div>
     </div>
 </template>
-<style scoped>
-    .cards {
+<style lang="css" scoped>
+    .wrapper {
+        height: 70vh;
+        max-height: 70vh;
+    }
+    .container {
+        min-height: 0;
+    }
+    .items {
+        column-count: 2;
+        column-gap: 1rem;
         overflow-y: scroll;
+    }
+    .items div {
+        break-inside: avoid;
+        margin-bottom: 1rem;
+        padding: 1rem;
     }
     ::-webkit-scrollbar {
         width: 8px;
     }
     ::-webkit-scrollbar-track {
-        background-color: var(--surface-color);
-        border-radius: 20px;
+        width: 0.5rem;
+        border-radius: 10px;
+        background-color: var(--background-color);
     }
     ::-webkit-scrollbar-thumb {
+        border-radius: 10px;
         background-color: var(--accent-color);
-        border-radius: 20px;
     }
-
 </style>

@@ -1,24 +1,23 @@
-using ToDoApp.enumerable.Status;
+using ToDoApp.enumerable;
 
 namespace ToDoApp.dto
 {
-    namespace ProjectDTO
+    public class ProjectDTO
     {
-        public class ProjectDTO
-        {
-            public string Name { get; set; }
-            public string Description { get; set; }
-            public DateTime StartDate { get; set;}
-            public DateTime? FinishDate { get; set;}
-            public Status Status { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public DateTime StartDate { get; set;}
+        public DateTime? FinishDate { get; set;}
+        public Status Status { get; set; }
 
-            public ProjectDTO(string name, string description, Status status, DateTime dateTime, DateTime? finishDate = null) {
-                Name = name;
-                Description = description;
-                StartDate = dateTime;
-                FinishDate = finishDate;
-                Status = status;
-            }
+        public ProjectDTO(int id, string name, string description, Status status, DateTime startDate, DateTime? finishDate = null) {
+            Id = id;
+            Name = name;
+            Description = description;
+            StartDate = startDate;
+            FinishDate = finishDate;
+            Status = status;
         }
     }
 }

@@ -1,16 +1,13 @@
-using ToDoApp.models.TodoItem;
+using ToDoApp.models;
 
 namespace ToDoApp.repository.interfaces
 {
-    namespace ITodoRepository
+    public interface ITodoRepository
     {
-        public interface ITodoRepository
-        {
-            Task<List<TodoItem>> GetAllAsync();
-            Task<TodoItem?> GetByIdAsync(int id);
-            Task AddAsync(TodoItem item);
-            Task UpdateAsync(int id, TodoItem item);
-            Task DeleteAsync(int id);
-        }
+        Task<List<TodoItem>> GetAllAsync();
+        Task<TodoItem?> GetByIdAsync(int id);
+        Task AddAsync(TodoItem item);
+        Task UpdateAsync(int id, TodoItem item);
+        Task DeleteAsync(int id);
     }
 }

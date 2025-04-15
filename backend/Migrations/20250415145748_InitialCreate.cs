@@ -30,6 +30,19 @@ namespace ToDoApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Technologies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "varchar(50)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Technologies", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TodoItems",
                 columns: table => new
                 {
@@ -54,38 +67,46 @@ namespace ToDoApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Technologies",
+                name: "TodoTechnologies",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "varchar(50)", nullable: false),
-                    TodoItemId = table.Column<int>(type: "integer", nullable: true)
+                    ItemId = table.Column<int>(type: "integer", nullable: false),
+                    TechnologyId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Technologies", x => x.Id);
+                    table.PrimaryKey("PK_TodoTechnologies", x => new { x.ItemId, x.TechnologyId });
                     table.ForeignKey(
-                        name: "FK_Technologies_TodoItems_TodoItemId",
-                        column: x => x.TodoItemId,
+                        name: "FK_TodoTechnologies_Technologies_TechnologyId",
+                        column: x => x.TechnologyId,
+                        principalTable: "Technologies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TodoTechnologies_TodoItems_ItemId",
+                        column: x => x.ItemId,
                         principalTable: "TodoItems",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Technologies_TodoItemId",
-                table: "Technologies",
-                column: "TodoItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TodoItems_ProjectId",
                 table: "TodoItems",
                 column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TodoTechnologies_TechnologyId",
+                table: "TodoTechnologies",
+                column: "TechnologyId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "TodoTechnologies");
+
             migrationBuilder.DropTable(
                 name: "Technologies");
 

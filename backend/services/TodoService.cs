@@ -1,98 +1,107 @@
-using ToDoApp.dto.ProjectDTO;
-using ToDoApp.dto.TodoItemDTO;
-using ToDoApp.models.Project;
-using ToDoApp.models.Technology;
-using ToDoApp.models.TodoItem;
-using ToDoApp.repository.ProjectRepository;
-using ToDoApp.repository.TechnologyRepository;
-using ToDoApp.repository.TodoRepository;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
+using ToDoApp.dto;
+using ToDoApp.models;
+using ToDoApp.repository.interfaces;
 using ToDoApp.services.interfaces.ITodoService;
 
 namespace ToDoApp.services 
 {
-    namespace TodoService
+    public class TodoService : ITodoService
     {
-        public class TodoService : ITodoService
+        private readonly ITodoRepository _todoRepository;
+        private readonly ITechnologyRepository _technologyRepository;
+        private readonly IProjectRepository _projectRepository;
+
+        public TodoService(ITodoRepository todoRepository, ITechnologyRepository technologyRepository, IProjectRepository projectRepository)
         {
-            private readonly TodoRepository _todoRepository;
-            private readonly TechnologyRepository _technologyRepository;
-            private readonly ProjectRepository _projectRepository;
+            _todoRepository = todoRepository;
+            _technologyRepository = technologyRepository;
+            _projectRepository = projectRepository;
+        }
+        public async Task AddProjectAsync(ProjectDTO projectDTO)
+        {
+            Project newProject = new Project(projectDTO.Name, projectDTO.Description);
+            await _projectRepository.AddAsync(newProject);
+        }
 
-            public TodoService(TodoRepository todoRepository, TechnologyRepository technologyRepository, ProjectRepository projectRepository)
-            {
-                _todoRepository = todoRepository;
-                _technologyRepository = technologyRepository;
-                _projectRepository = projectRepository;
-            }
-            public async Task AddProjectAsync(ProjectDTO projectDTO)
-            {
-                Project newProject = new Project(projectDTO.Name, projectDTO.Description);
-                await _projectRepository.AddAsync(newProject);
-            }
+        public async Task AddTodoItemAsync(TodoItemDTO itemDTO, int projectId)
+        {
+            Project? project = await _projectRepository.GetByIdAsync(projectId);
+            if (project == null)
+                throw new Exception("Can't add task to a project that does not exist");
 
-            public async Task AddTodoItemAsync(TodoItemDTO itemDTO, int projectId)
+            List<string> names = itemDTO.Technologies.Select(t => t.Name).ToList();
+            var technologies = await _technologyRepository.GetByNamesAsync(names);
+            foreach(Technology t in technologies) {
+                Console.WriteLine(t.Name);
+            }
+            List<TodoTechnology> todoTechnologies = technologies.Select(t => new TodoTechnology{Technology = t}).ToList();
+            TodoItem item = new TodoItem(itemDTO.Name, itemDTO.Description, todoTechnologies, project);
+            await _todoRepository.AddAsync(item);
+        }
+
+        public async Task AddTechnologyAsync(string name)
+        {
+            Technology technology = new Technology(name);
+            await _technologyRepository.AddAsync(technology);
+        }
+        public async Task<List<ProjectDTO>> GetProjectsAsync()
+        {
+            var projects = await _projectRepository.GetAllAsync();
+            List<ProjectDTO> projectDTOs = new();
+            foreach(Project p in projects)
             {
-                Project? project = await _projectRepository.GetByIdAsync(projectId);
-                if(project == null)
+                projectDTOs.Add(new ProjectDTO(
+                    p.Id,
+                    p.Name,
+                    p.Description,
+                    p.Status,
+                    p.StartDate,
+                    p.FinishDate
+                ));
+            }
+            return projectDTOs;
+        }
+
+        public async Task<List<TodoItemDTO>> GetTodoItemsAsync()
+        {
+            var items = await _todoRepository.GetAllAsync();
+            List<TodoItemDTO> itemDTOs = new();
+            foreach(TodoItem item in items)
+            {
+                itemDTOs.Add(new TodoItemDTO(
+                    item.Project.Id,
+                    item.Project.Name,
+                    item.Name,
+                    item.Description,
+                    item.Status,
+                    item.Technologies.Select(tt => tt.Technology).ToList(),
+                    item.StartDate,
+                    item.FinishDate
+                ));
+            }
+            return itemDTOs;
+        }
+        public async Task<List<Technology>> GetTechnologiesAsync()
+        {
+            var technologies = await _technologyRepository.GetAllAsync();
+            return technologies;
+        }
+
+
+        private async Task<List<TodoItem>> GetProjectTasksAsync(Project project)
+        {
+            List<TodoItem> tasks = await _todoRepository.GetAllAsync();
+            List<TodoItem> projectTasks = new();
+            foreach(TodoItem item in tasks)
+            {
+                if(item.Project == project)
                 {
-                    throw new Exception("Can't add task to a project that does not exist");
+                    projectTasks.Add(item);
                 }
-                TodoItem item = new TodoItem(itemDTO.Name, itemDTO.Description, itemDTO.Technologies.ToList(), project);
-                await _todoRepository.AddAsync(item);
             }
-
-            public async Task<List<object>> GetProjectsAsync()
-            {
-                var projects = await _projectRepository.GetAllAsync();
-                List<object> projectsAndTechnologies = new();
-                foreach(Project p in projects)
-                {
-                    HashSet<Technology> techs = new();
-                    List<TodoItem> todoItems = await GetProjectTasksAsync(p);
-                    foreach(TodoItem item in todoItems)
-                    {
-                        foreach(Technology tech in item.Technologies)
-                        {
-                            techs.Add(tech);
-                        }
-                    }
-                    projectsAndTechnologies.Add(new {project = p, technologies = techs.ToList()});
-                }
-                return projectsAndTechnologies;
-            }
-
-            public async Task<List<TodoItemDTO>> GetTodoItemsAsync()
-            {
-                var items = await _todoRepository.GetAllAsync();
-                List<TodoItemDTO> itemDTOs = new();
-                foreach(TodoItem item in items)
-                {
-                    itemDTOs.Add(new TodoItemDTO(
-                        item.Project.Name,
-                        item.Name,
-                        item.Description,
-                        item.Status,
-                        item.Technologies,
-                        item.StartDate,
-                        item.FinishDate
-                    ));
-                }
-                return itemDTOs;
-            }
-
-            private async Task<List<TodoItem>> GetProjectTasksAsync(Project project)
-            {
-                List<TodoItem> tasks = await _todoRepository.GetAllAsync();
-                List<TodoItem> projectTasks = new();
-                foreach(TodoItem item in tasks)
-                {
-                    if(item.Project == project)
-                    {
-                        projectTasks.Add(item);
-                    }
-                }
-                return projectTasks;
-            }
+            return projectTasks;
         }
     }
 }

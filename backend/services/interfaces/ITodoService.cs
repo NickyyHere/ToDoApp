@@ -1,6 +1,5 @@
-using ToDoApp.dto.ProjectDTO;
-using ToDoApp.dto.TodoItemDTO;
-using ToDoApp.models.Technology;
+using ToDoApp.dto;
+using ToDoApp.models;
 
 namespace ToDoApp.services.interfaces
 {
@@ -10,9 +9,10 @@ namespace ToDoApp.services.interfaces
         {
             Task<List<TodoItemDTO>> GetTodoItemsAsync();
             Task AddTodoItemAsync(TodoItemDTO itemDTO, int projectId);
-            Task<List<object>> GetProjectsAsync();
+            Task<List<ProjectDTO>> GetProjectsAsync();
             Task AddProjectAsync(ProjectDTO projectDTO);
-            
+            Task AddTechnologyAsync(string name);
+            Task<List<Technology>> GetTechnologiesAsync();
         }
     }  
 }
