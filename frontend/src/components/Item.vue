@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { redirect } from '../functions/utils';
 import type { ProjectData, TaskData } from '../types/ItemData';
-
-    defineProps<{
+    const props = defineProps<{
         itemData: TaskData | ProjectData
     }>()
+    const prop = props.itemData
 </script>
 <template>
     <div class="bg-surface border rounded itemWrapper">
-        <div class="item" @click="redirect('/details')">
+        <div class="item" @click="redirect({url: '/details', props: prop})">
             <p class="text-center">{{ itemData.name }}</p>
             <p class="font-sm">{{ itemData.description }}</p>
         </div>

@@ -8,6 +8,7 @@ const itemType = ref<"tasks" | "projects" | "technologies">("tasks")
 const checkedTechnologies = ref<TechnologyData[]>([])
 const projects = ref<any[]>([])
 const technologies = ref<TechnologyData[]>([])
+const validation = ref<string | null>(null)
 
 const formData = ref({
     name: '',
@@ -55,12 +56,37 @@ const labelAsCheckbox = (event: Event) => {
 }
 
 const sendForm = async () => {
+    if(!validateForm()) {
+        return
+    }
     formData.value.technologies = checkedTechnologies.value
     if(formData.value.project == -1) {
         await addNewItem(itemType.value, formToTypeData(itemType.value, formData.value))
     } else {
         await addNewItem(itemType.value, formToTypeData(itemType.value, formData.value), formData.value.project)
     }
+}
+
+function validateForm(): boolean  {
+    if(formData.value.name.length == 0) {
+        validation.value = "Name can't be empty"
+        return false
+    }
+    if((itemType.value == "tasks" || itemType.value == "projects") && formData.value.description.length == 0) {
+        validation.value = "Description can't be empty"
+        return false
+    }
+    if(itemType.value == "tasks") {
+        if(formData.value.project == -1) {
+            validation.value = "Select a project"
+            return false
+        }
+        if(formData.value.technologies.length == 0) {
+            validation.value = "Select technologies"
+            return false
+        }
+    }
+    return true
 }
 
 onMounted(async () => {
@@ -70,37 +96,58 @@ onMounted(async () => {
 
 </script>
 <template>
-    <div>
-        <label for="type">Type:</label>
-        <select v-model="itemType" name="type" @change="handleChangeType">
-            <option value="tasks">Task</option>
-            <option value="projects">Project</option>
-            <option value="technologies">Technology</option>
-        </select>
-    </div>
-    <form @submit.prevent="sendForm" class="form">
+    <div class="flex direction-col text-center">
+        <h1>ADD NEW ITEM</h1>
+        <hr>
+        <p v-if="validation" class="font-error margin-top m-lg font-xl">{{ validation }}</p>
         <div>
-            <label for="name">Name:</label>
-            <input type="text" name="name" v-model="formData.name">
-        </div>
-        <div v-if="itemType === 'tasks' || itemType === 'projects'">
-            <label for="description">Description</label>
-            <textarea name="description" v-model="formData.description"></textarea>
-        </div>
-        <div v-if="itemType === 'tasks'">
-            <label for="project">Project:</label>
-            <select name="project" v-model="formData.project" >
-                <option v-for="project in projects" :value="project.id"> {{ project.name }} </option>
+            <label for="type" class="text-center block font-xxl margin-top m-md">TYPE</label><br>
+            <select v-model="itemType" name="type" @change="handleChangeType" class="font-xl padding p-xs input">
+                <option value="tasks">Task</option>
+                <option value="projects">Project</option>
+                <option value="technologies">Technology</option>
             </select>
         </div>
-        <div v-if="itemType === 'tasks'" class="select-none margin-top margin-bottom m-md">
-            <div class="inline-block" v-for="technology in technologies">
-                <label :for="technology.name" class="checkbox font-xxl padding p-xs margin m-xs" @click="labelAsCheckbox">{{ technology.name }}</label>
-                <input type="checkbox" :name="technology.name" :value="technology.id" class="hidden">
+        <form @submit.prevent="sendForm">
+            <div>
+                <label for="name" class="text-center block font-xxl margin-top m-md">NAME</label><br>
+                <input type="text" name="name" v-model="formData.name" class="font-xl padding p-xs input" required>
             </div>
-        </div>
-        <button type="submit">Submit</button>
-    </form>
+            <div v-if="itemType === 'tasks' || itemType === 'projects'">
+                <label for="description" class="text-center block font-xxl margin-top m-md">DESCRIPTION</label><br>
+                <textarea name="description" v-model="formData.description" class="font-md padding p-xs description input" required></textarea>
+            </div>
+            <div v-if="itemType === 'tasks'">
+                <label for="project" class="text-center block font-xxl margin-top m-md">PROJECT</label>
+                <select name="project" v-model="formData.project" class="font-xl padding p-xs input">
+                    <option v-for="project in projects" :value="project.id"> {{ project.name }} </option>
+                </select>
+            </div>
+            <div v-if="itemType === 'tasks'" class="select-none margin-top margin-bottom m-md">
+                <div class="inline-block" v-for="technology in technologies">
+                    <label :for="technology.name" class="checkbox font-xxl padding p-xs margin m-xs" @click="labelAsCheckbox">{{ technology.name }}</label>
+                    <input type="checkbox" :name="technology.name" :value="technology.id" class="hidden">
+                </div>
+            </div>
+            <button type="submit" class="font-xxl padding p-xs rounded">Submit</button>
+        </form>
+    </div>
 </template>
 <style lang="css" scoped>
+    .checkbox {
+        cursor: pointer;
+        transition: .3s;
+    }
+    .checkbox:hover {
+        border-color: var(--accent-color);
+    }
+    .input {
+        width: 15vw;
+        border: 1px solid var(--border-color);
+    }
+    textarea.description {
+        max-width: 15vw;
+        min-width: 15vw;
+        min-height: 20vh;
+    }
 </style>

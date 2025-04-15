@@ -462,3 +462,14 @@ select, input, textarea {
 .checkbox.checked {
   border: 1px solid var(--accent-color);
 }
+button {
+  cursor: pointer;
+  border: 2px solid var(--border-color);
+  background-color: var(--surface-color);
+  color: var(--text-color);
+  transition: .3s;
+}
+button:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}

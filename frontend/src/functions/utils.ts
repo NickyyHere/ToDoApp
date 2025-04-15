@@ -5,9 +5,14 @@ export async function filterDataByStatus(data: TaskData[] | ProjectData[], statu
     return data.filter(item => item.status == status)
 }
 
-export function redirect(url: string) {
-    router.push(url)
-}
+export function redirect(options: string | { url: string, props?: any }) {
+    if (typeof options === 'string') {
+      router.push(options)
+    } else {
+      const query = options.props ? { data: JSON.stringify(options.props) } : undefined
+      router.push({ path: options.url, query })
+    }
+  }
 
 export function formToTypeData(type: string, formData: {
     name: string

@@ -7,7 +7,7 @@ import AddNew from './views/Add-new.vue';
 const routes: Array<RouteRecordRaw> = 
 [
   {path: "/", component: Todo },
-  {path: "/details", component: Details },
+  {path: "/details", component: Details, props: true },
   {path: "/add-new", component: AddNew}  
 ]
 
