@@ -15,8 +15,6 @@ watch(fetchType, async(newType) => {
     newItems.value = await filterDataByStatus(data as ProjectData[], 0)
     inProgressItems.value = await filterDataByStatus(data as ProjectData[], 1)
     finishedItems.value = await filterDataByStatus(data as ProjectData[], 2)
-    console.log(data)
-    console.log(newItems.value)
 }, {immediate: true})
 
 const switchFetchType = () => {
@@ -26,8 +24,8 @@ const switchFetchType = () => {
 </script>
 <template>
     <div class="text-center">
-        <span class="font-xxl text-bold select-none inline-block margin-right m-md type" @click="switchFetchType">{{ fetchType.toUpperCase() }} <i class="fa-solid fa-rotate"></i></span>
-        <span class="font-xxl text-bold select-none inline-block add-button" @click="redirect('/add-new')">ADD NEW <i class="fa-solid fa-plus"></i></span>
+        <span class="font-xxl text-bold select-none inline-block margin-right m-md type" @click="switchFetchType">{{ fetchType.toUpperCase() }} <i class="fa-solid fa-rotate font-xxl"></i></span>
+        <span class="font-xxl text-bold select-none inline-block add-button" @click="redirect('/add-new')">ADD NEW <i class="fa-solid fa-plus font-xxl"></i></span>
     </div>
     <div class="padding p-lg flex direction-row gap-sm">
         <Column title="NEW" :data="newItems"></Column>

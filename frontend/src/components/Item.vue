@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { redirect } from '../functions/utils';
+import { redirect, isTaskData } from '../functions/utils';
 import type { ProjectData, TaskData } from '../types/ItemData';
     const props = defineProps<{
         itemData: TaskData | ProjectData
     }>()
-    const prop = props.itemData
+    const finishDate = props.itemData.finishDate == null ? "ONGOING" : new Date(props.itemData.finishDate).toLocaleDateString()
 </script>
 <template>
     <div class="bg-surface border rounded itemWrapper">
-        <div class="item" @click="redirect({url: '/details', props: prop})">
-            <p class="text-center">{{ itemData.name }}</p>
+        <div class="item" @click="redirect({url: '/details', props: props.itemData})">
+            <p class="text-center font-xxl">{{ itemData.name }}</p>
+            <p class="text-center" v-if="isTaskData(itemData)">{{ itemData.projectName }}</p>
+            <hr class="margin m-xs">
             <p class="font-sm">{{ itemData.description }}</p>
+            <p class="text-center">{{ new Date(props.itemData.startDate).toLocaleDateString() }} - {{ finishDate }}</p>
         </div>
     </div>
 </template>

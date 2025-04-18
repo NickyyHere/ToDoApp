@@ -31,11 +31,8 @@ namespace ToDoApp.services
             if (project == null)
                 throw new Exception("Can't add task to a project that does not exist");
 
-            List<string> names = itemDTO.Technologies.Select(t => t.Name).ToList();
+            List<string> names = itemDTO.Technologies.Select(t => t).ToList();
             var technologies = await _technologyRepository.GetByNamesAsync(names);
-            foreach(Technology t in technologies) {
-                Console.WriteLine(t.Name);
-            }
             List<TodoTechnology> todoTechnologies = technologies.Select(t => new TodoTechnology{Technology = t}).ToList();
             TodoItem item = new TodoItem(itemDTO.Name, itemDTO.Description, todoTechnologies, project);
             await _todoRepository.AddAsync(item);
@@ -70,13 +67,14 @@ namespace ToDoApp.services
             List<TodoItemDTO> itemDTOs = new();
             foreach(TodoItem item in items)
             {
+                Console.WriteLine($"PROJECT NAME: {item.Project.Name}");
                 itemDTOs.Add(new TodoItemDTO(
-                    item.Project.Id,
+                    item.Id,
                     item.Project.Name,
                     item.Name,
                     item.Description,
                     item.Status,
-                    item.Technologies.Select(tt => tt.Technology).ToList(),
+                    item.Technologies.Select(tt => tt.Technology.Name).ToList(),
                     item.StartDate,
                     item.FinishDate
                 ));

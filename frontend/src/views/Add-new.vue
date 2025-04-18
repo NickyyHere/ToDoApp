@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
-import { formToTypeData } from '../functions/utils'
+import { formToTypeData, labelAsCheckbox } from '../functions/utils'
 import { addNewItem, fetchItems } from '../functions/communication'
 import type { TechnologyData } from '../types/ItemData'
 
 const itemType = ref<"tasks" | "projects" | "technologies">("tasks")
-const checkedTechnologies = ref<TechnologyData[]>([])
+const checkedTechnologies = ref<string[]>([])
 const projects = ref<any[]>([])
 const technologies = ref<TechnologyData[]>([])
 const validation = ref<string | null>(null)
@@ -14,7 +14,7 @@ const formData = ref({
     name: '',
     description: '',
     project: -1,
-    technologies: new Array<TechnologyData>
+    technologies: new Array<string>
 })
 
 const handleChangeType = () => {
@@ -27,39 +27,11 @@ const handleChangeType = () => {
     formData.value.technologies = []
 }
 
-const labelAsCheckbox = (event: Event) => {
-    const target = event.target as HTMLElement
-    const checkbox = target.closest('div')?.querySelector('input[type="checkbox"]') as HTMLInputElement
-    checkbox.checked = !checkbox.checked
-    target.classList.toggle('checked')
-    const technology: TechnologyData = {
-        id: parseInt(checkbox.value),
-        name: checkbox.name
-    }
-    let index: number | null = null
-    if(checkedTechnologies.value.length == 0) {
-        checkedTechnologies.value.push(technology)
-    } else {
-        for(let i = 0; i < checkedTechnologies.value.length; i++) {
-            if(checkedTechnologies.value[i].id == technology.id) {
-                index = i
-                break
-            }
-        }
-
-        if(index == null) {
-            checkedTechnologies.value.push(technology)
-        } else {
-            checkedTechnologies.value.splice(index, 1)
-        }
-    }
-}
-
 const sendForm = async () => {
+    formData.value.technologies = checkedTechnologies.value
     if(!validateForm()) {
         return
     }
-    formData.value.technologies = checkedTechnologies.value
     if(formData.value.project == -1) {
         await addNewItem(itemType.value, formToTypeData(itemType.value, formData.value))
     } else {
@@ -125,8 +97,8 @@ onMounted(async () => {
             </div>
             <div v-if="itemType === 'tasks'" class="select-none margin-top margin-bottom m-md">
                 <div class="inline-block" v-for="technology in technologies">
-                    <label :for="technology.name" class="checkbox font-xxl padding p-xs margin m-xs" @click="labelAsCheckbox">{{ technology.name }}</label>
-                    <input type="checkbox" :name="technology.name" :value="technology.id" class="hidden">
+                    <label :for="technology.name" class="checkbox font-xxl padding p-xs margin m-xs" @click="labelAsCheckbox($event.target as HTMLElement, checkedTechnologies)">{{ technology.name }}</label>
+                    <input type="checkbox" :name="technology.name" :value="technology.name" class="hidden">
                 </div>
             </div>
             <button type="submit" class="font-xxl padding p-xs rounded">Submit</button>
@@ -134,13 +106,6 @@ onMounted(async () => {
     </div>
 </template>
 <style lang="css" scoped>
-    .checkbox {
-        cursor: pointer;
-        transition: .3s;
-    }
-    .checkbox:hover {
-        border-color: var(--accent-color);
-    }
     .input {
         width: 15vw;
         border: 1px solid var(--border-color);

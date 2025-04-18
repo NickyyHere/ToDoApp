@@ -30,7 +30,11 @@ namespace ToDoApp.repository
 
         public async Task<List<TodoItem>> GetAllAsync()
         {
-            return await _context.TodoItems.ToListAsync();
+            return await _context.TodoItems
+                .Include(t => t.Project)
+                .Include(t => t.Technologies)
+                    .ThenInclude(tt => tt.Technology)
+                .ToListAsync();
         }
 
         public async Task<TodoItem?> GetByIdAsync(int id)

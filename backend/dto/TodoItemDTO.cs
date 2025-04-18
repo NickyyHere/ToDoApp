@@ -12,9 +12,9 @@ namespace ToDoApp.dto
         public Status Status { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? FinishDate { get; set; }
-        public ICollection<Technology> Technologies { get; set; }
+        public List<string> Technologies { get; set; }
 
-        public TodoItemDTO(int id, string projectName, string name, string description, Status status, ICollection<Technology> technologies, DateTime startDate, DateTime? finishDate = null) {
+        public TodoItemDTO(int id, string projectName, string name, string description, Status status, List<string> technologies, DateTime startDate, DateTime? finishDate = null) {
             Id = id;
             ProjectName = projectName;
             Name = name;

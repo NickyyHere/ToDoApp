@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ToDoApp.dto;
+using ToDoApp.models;
 using ToDoApp.services.interfaces.ITodoService;
 
 namespace ToDoApp.controllers 
@@ -50,6 +51,20 @@ namespace ToDoApp.controllers
         public async Task<IActionResult> AddTechnology([FromBody] string name)
         {
             await _todoService.AddTechnologyAsync(name);
+            return Ok();
+        }
+        [HttpPut("projects/{id}")]
+        public async Task<IActionResult> UpdateProject([FromBody] ProjectDTO projectDTO, [FromRoute] int id)
+        {
+            Console.WriteLine("AYO");
+            await Task.Delay(1);
+            return Ok();
+        }
+        [HttpPut("tasks/{id}")]
+        public async Task<IActionResult> UpdateTask([FromBody] TodoItemDTO todoItemDTO, [FromRoute] int id)
+        {
+            Console.WriteLine("AYOO");
+            await Task.Delay(1);
             return Ok();
         }
     }

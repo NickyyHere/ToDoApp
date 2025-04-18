@@ -17,7 +17,6 @@ export async function addNewItem(type: string, data: TaskData | ProjectData | st
         if(projectId != null) {
             url += `/${projectId}`
         }
-
         await axios.post(url, JSON.stringify(data),
     {
         headers: {
@@ -26,5 +25,19 @@ export async function addNewItem(type: string, data: TaskData | ProjectData | st
     })
     } catch(error) {
         console.error(`Error adding new ${type}: ${error}`)
+    }
+}
+
+export async function updateItem(type: string, data: TaskData | ProjectData, id: number) {
+    try {
+        let url = `http://localhost:5000/api/todo/${type}/${id}`
+        axios.put(url, JSON.stringify(data),
+    {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    } catch(error) {
+        console.error(`Error updating ${type}: ${error}`)
     }
 }

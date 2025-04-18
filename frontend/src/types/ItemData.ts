@@ -6,7 +6,7 @@ export type TaskData = {
     status: number 
     startDate: string 
     finishDate: string | null 
-    technologies: TechnologyData[]
+    technologies: string[]
 }
 export type ProjectData = {
     id: number 
