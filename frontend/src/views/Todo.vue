@@ -8,7 +8,7 @@ import type { ProjectData, TaskData } from '../types/ItemData'
 
 const route = useRoute()
 const raw = route.query.data as string
-const data = raw ? JSON.parse(raw) as {notification: string} : null
+const notificationData = raw ? JSON.parse(raw) as {notification: string} : null
 
 const notification = ref<string | null>('')
 
@@ -29,8 +29,8 @@ const switchFetchType = () => {
 }
 
 onMounted(() => {
-    if(data != null) {
-        notification.value = data.notification
+    if(notificationData != null) {
+        notification.value = notificationData.notification
         setTimeout(() => {notification.value = null}, 3000)
     }
 })

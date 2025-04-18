@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using ToDoApp.dto;
+using ToDoApp.enumerable;
 using ToDoApp.models;
 using ToDoApp.repository.interfaces;
 using ToDoApp.services.interfaces.ITodoService;
@@ -143,6 +144,27 @@ namespace ToDoApp.services
             }
             return projectTasks;
         }
-
+        public async Task ChangeProjectStatus(int id)
+        {
+            var project = await _projectRepository.GetByIdAsync(id);
+            if(project == null)
+                throw new Exception("Project does not exist");
+            if((int)project.Status++ > 2)
+                throw new Exception("Project is already of finished status");
+            if((int)project.Status == (int)Status.FINISHED)
+                project.FinishDate = DateTime.Now;
+            await _projectRepository.UpdateAsync(id, project);
+        }
+        public async Task ChangeTaskStatus(int id)
+        {
+            var task = await _todoRepository.GetByIdAsync(id);
+            if(task == null)
+                throw new Exception("Project does not exist");
+            if((int)task.Status++ > (int)Status.FINISHED)
+                throw new Exception("Project is already of finished status");
+            if((int)task.Status == (int)Status.FINISHED)
+                task.FinishDate = DateTime.Now;
+            await _todoRepository.UpdateAsync(id, task);
+        }
     }
 }

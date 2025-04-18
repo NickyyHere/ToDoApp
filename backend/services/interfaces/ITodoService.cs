@@ -17,6 +17,8 @@ namespace ToDoApp.services.interfaces
             Task UpdateTask(TodoItemDTO todoItemDTO, int id);
             Task DeleteProject(int id);
             Task DeleteTask(int id);
+            Task ChangeProjectStatus(int id);
+            Task ChangeTaskStatus(int id);
         }
     }  
 }

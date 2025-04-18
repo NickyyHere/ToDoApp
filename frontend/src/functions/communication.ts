@@ -53,3 +53,13 @@ export async function deleteItem(type: string, id: number) {
         console.error(`Error updating ${type}: ${error}`)
     }
 }
+
+export async function changeItemStatus(type: string, id: number) {
+    try {
+        let url = `http://localhost:5000/api/todo/${type}/status/${id}`
+        const response = await axios.put(url)
+        return response.status
+    } catch(error) {
+        console.error(`Error updating ${type}: ${error}`)
+    }
+}

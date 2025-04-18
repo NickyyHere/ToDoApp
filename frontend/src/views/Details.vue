@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchItems, updateItem, deleteItem } from '../functions/communication'
+import { fetchItems, updateItem, deleteItem, changeItemStatus } from '../functions/communication'
 import type { ProjectData, TaskData } from '../types/ItemData'
 import { formToTypeDataUpdate, isTaskData, labelAsCheckbox, redirect, statusToText } from '../functions/utils'
 
@@ -23,6 +23,8 @@ const validation = ref<string | null>(null)
 const confimation = ref<string>('')
 const confirmationResult = ref<string | null>(null)
 const viewConfirmation = ref<boolean>(false)
+
+const blockStatusChange = ref<boolean>(false)
 
 const notification = ref<string | null>('')
 
@@ -84,6 +86,20 @@ async function delItem() {
     else {
         notification.value = "Deleting item failed!"
         viewConfirmation.value = false
+        setTimeout(() => {notification.value = null}, 3000)
+    }
+}
+
+async function changeStatus() {
+    const type = isTaskData(data) ? "tasks" : "projects"
+    let response = await changeItemStatus(type, (data as ProjectData | TaskData).id)
+    if(response == 200) {
+        notification.value = "Status changed";
+        (data as TaskData | ProjectData).status += 1
+        blockStatusChange.value = true
+        setTimeout(() => {notification.value = null}, 3000)
+    }else {
+        notification.value = "Status changing failed!"
         setTimeout(() => {notification.value = null}, 3000)
     }
 }
@@ -167,15 +183,15 @@ onMounted(async () => {
                 </div>
             </div>
             <div v-if="isEditing" class="margin-top m-xl flex justify-center gap-sm">
-                <button class="padding p-xs font-xxl">SAVE</button>
-                <button class="padding p-xs font-xxl" @click="isEditing=false">CANCEL</button>
+                <button class="padding p-xs font-xxl" type="submit">SAVE</button>
+                <button class="padding p-xs font-xxl" @click="isEditing=false" type="button">CANCEL</button>
             </div>
             <div v-else >
-                <p class="margin-top m-md font-xl">{{ statusToText((data as TaskData | ProjectData).status) }}</p>
+                <p class="margin-top m-md font-xl">{{ statusToText((data as TaskData | ProjectData).status) }}<button type="button" @click="changeStatus()" class="absolute move margin-left m-xl padding p-xs" v-if="(data as TaskData | ProjectData).status < 2 && !blockStatusChange">Move to {{ statusToText((data as TaskData | ProjectData).status + 1) }}</button></p>
                 <p class="margin-top m-md font-xl">{{ startDate.toLocaleDateString() }} - {{ finishDate }}</p>
-                <div class="margin-top m-xl flex justify-center gap-sm">
-                    <button class="padding p-xs font-xxl" @click="isEditing=true">EDIT</button>
-                    <button class="padding p-xs font-xxl" @click="viewConfirmation=true">DELETE</button>
+                <div class="margin-top m-xl flex justify-center gap-sm" v-if="(data as TaskData | ProjectData).status < 2">
+                    <button class="padding p-xs font-xxl" type="button" @click="isEditing=true">EDIT</button>
+                    <button class="padding p-xs font-xxl" type="button" @click="viewConfirmation=true">DELETE</button>
                 </div>
             </div>
         </form>

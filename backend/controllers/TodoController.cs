@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using Microsoft.AspNetCore.Mvc;
 using ToDoApp.dto;
 using ToDoApp.services.interfaces.ITodoService;
@@ -73,6 +74,18 @@ namespace ToDoApp.controllers
         public async Task<IActionResult> DeleteProject([FromRoute] int id)
         {
             await _todoService.DeleteProject(id);
+            return Ok();
+        }
+        [HttpPut("projects/status/{id}")]
+        public async Task<IActionResult> ChangeProjectStatus([FromRoute] int id)
+        {
+            await _todoService.ChangeProjectStatus(id);
+            return Ok();
+        }
+        [HttpPut("tasks/status/{id}")]
+        public async Task<IActionResult> ChangeTaskStatus([FromRoute] int id)
+        {
+            await _todoService.ChangeTaskStatus(id);
             return Ok();
         }
     }
