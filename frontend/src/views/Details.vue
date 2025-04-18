@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchItems, updateItem } from '../functions/communication'
+import { fetchItems, updateItem, deleteItem } from '../functions/communication'
 import type { ProjectData, TaskData } from '../types/ItemData'
-import { formToTypeDataUpdate, isTaskData, labelAsCheckbox } from '../functions/utils'
+import { formToTypeDataUpdate, isTaskData, labelAsCheckbox, statusToText } from '../functions/utils'
 
 const route = useRoute()
 const raw = route.query.data as string
@@ -18,6 +18,10 @@ const startDate = new Date((data?.startDate) as string)
 const finishDate = data?.finishDate == null ? "ONGOING" : new Date(data.finishDate).toLocaleDateString()
 
 const validation = ref<string | null>(null)
+
+const confimation = ref<string>('')
+const confirmationResult = ref<string | null>(null)
+const viewConfirmation = ref<boolean>(false)
 
 const formData = ref({
     name: (data as TaskData | ProjectData).name,
@@ -53,12 +57,38 @@ function validateForm(): boolean  {
     return true
 }
 
+
+function delItem() {
+    if(confimation.value !== data?.name + '#' + data?.id) {
+        confirmationResult.value = "Invalid input"
+        return
+    }
+
+    if(isTaskData(data))
+        deleteItem("tasks", (data as TaskData).id)
+    else
+        deleteItem("projects", (data as ProjectData).id)
+}
+
 onMounted(async () => {
     projects.value = (await fetchItems("projects")) as ProjectData[]
     technologies.value = (await fetchItems("technologies")) as TaskData[]
 })
 </script>
 <template>
+    <div v-if="viewConfirmation" class="cover bg-primary padding p-lg border border-thicker">
+        <div class="close font-xxl" @click="viewConfirmation=false">X</div>
+        <div class="cover-item absolute-center bg-primary border border-thicker padding p-lg flex justify-center direction-col text-center">
+            <h3>CONFIRM DELETING ITEM</h3>
+            <hr>
+            <h3>Type name and id of item to delete</h3>
+            <p class="error" v-if="confirmationResult">{{ confirmationResult }}</p>
+            <div>
+                <input type="text" :placeholder="'NAME#ID'" class="font-xxl padding p-xs" v-model="confimation">
+            </div>
+            <button class="padding p-xs margin m-md" @click="delItem()">CONFIRM</button>
+        </div>
+    </div>
     <div class="text-center">
         <div v-if="isEditing">
             <h2>
@@ -86,7 +116,6 @@ onMounted(async () => {
             </div>
             <div v-else>
                 <p v-if="isTaskData(data)" class="font-xl">{{ data?.projectName }}</p>
-                <hr>
             </div>
             <div v-if="isEditing">
                 <div>
@@ -94,7 +123,9 @@ onMounted(async () => {
                     <textarea name="description" class="padding p-xs font-xl" v-model="formData.description"></textarea>
                 </div>
             </div>
-            <div v-else>
+            <div v-else class="margin-top m-md">
+                <hr>
+                <h3>DESCRIPTION</h3>
                 <p class="text-left padding p-lg">{{ data?.description }}</p>
                 <hr>
             </div>
@@ -110,19 +141,21 @@ onMounted(async () => {
                 </div>
             </div>
             <div v-else>
-                <div v-if="isTaskData(data)" class="flex justify-center margin-top m-md">
+                <div v-if="isTaskData(data)" class="flex justify-center margin-top m-md gap-sm">
                     <div v-for="technology in data?.technologies" class="border rounded padding p-xs font-xl">{{ technology }}</div>
                 </div>
             </div>
-            <div v-if="isEditing">
-                <div class="margin-top m-xl flex justify-center gap-sm">
-                    <button class="padding p-xs font-xxl">SAVE</button>
-                    <button class="padding p-xs font-xxl" @click="isEditing=false">CANCEL</button>
-                </div>
+            <div v-if="isEditing" class="margin-top m-xl flex justify-center gap-sm">
+                <button class="padding p-xs font-xxl">SAVE</button>
+                <button class="padding p-xs font-xxl" @click="isEditing=false">CANCEL</button>
             </div>
-            <div v-else>
+            <div v-else >
+                <p class="margin-top m-md font-xl">{{ statusToText((data as TaskData | ProjectData).status) }}</p>
                 <p class="margin-top m-md font-xl">{{ startDate.toLocaleDateString() }} - {{ finishDate }}</p>
-                <button class="padding p-xs font-xxl" @click="isEditing=true">EDIT</button>
+                <div class="margin-top m-xl flex justify-center gap-sm">
+                    <button class="padding p-xs font-xxl" @click="isEditing=true">EDIT</button>
+                    <button class="padding p-xs font-xxl" @click="viewConfirmation=true">DELETE</button>
+                </div>
             </div>
         </form>
     </div>

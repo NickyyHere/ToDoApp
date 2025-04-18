@@ -15,6 +15,8 @@ namespace ToDoApp.services.interfaces
             Task<List<Technology>> GetTechnologiesAsync();
             Task UpdateProject(ProjectDTO projectDTO, int id);
             Task UpdateTask(TodoItemDTO todoItemDTO, int id);
+            Task DeleteProject(int id);
+            Task DeleteTask(int id);
         }
     }  
 }

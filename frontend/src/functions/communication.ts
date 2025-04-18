@@ -41,3 +41,12 @@ export async function updateItem(type: string, data: TaskData | ProjectData, id:
         console.error(`Error updating ${type}: ${error}`)
     }
 }
+
+export async function deleteItem(type: string, id: number) {
+    try {
+        let url = `http://localhost:5000/api/todo/${type}/${id}`
+        await axios.delete(url)
+    } catch(error) {
+        console.error(`Error updating ${type}: ${error}`)
+    }
+}

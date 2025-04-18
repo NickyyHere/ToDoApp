@@ -113,7 +113,23 @@ namespace ToDoApp.services
             todoItem.Technologies = technologies.Select(t => new TodoTechnology{Technology = t}).ToList();
             await _todoRepository.UpdateAsync(id, todoItem);
         }
-
+        public async Task DeleteTask(int id)
+        {
+            await _todoRepository.DeleteAsync(id);
+        }
+        public async Task DeleteProject(int id)
+        {
+            var project = await _projectRepository.GetByIdAsync(id);
+            if(project == null)
+                throw new Exception("Project does not exist");
+            
+            List<TodoItem> projectTasks = await GetProjectTasksAsync(project);
+            foreach(TodoItem task in projectTasks)
+            {
+                await _todoRepository.DeleteAsync(task.Id);
+            }
+            await _projectRepository.DeleteAsync(id);
+        }
         private async Task<List<TodoItem>> GetProjectTasksAsync(Project project)
         {
             List<TodoItem> tasks = await _todoRepository.GetAllAsync();

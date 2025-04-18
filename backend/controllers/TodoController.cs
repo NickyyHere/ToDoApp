@@ -63,5 +63,17 @@ namespace ToDoApp.controllers
             await _todoService.UpdateTask(todoItemDTO, id);
             return Ok();
         }
+        [HttpDelete("tasks/{id}")]
+        public async Task<IActionResult> DeleteTask([FromRoute] int id)
+        {
+            await _todoService.DeleteTask(id);
+            return Ok();
+        }
+        [HttpDelete("projects/{id}")]
+        public async Task<IActionResult> DeleteProject([FromRoute] int id)
+        {
+            await _todoService.DeleteProject(id);
+            return Ok();
+        }
     }
 }

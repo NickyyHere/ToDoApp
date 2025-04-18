@@ -109,3 +109,16 @@ export function labelAsCheckbox(target: HTMLElement, checkedTechnologies: string
         }
     }
 }
+
+export function statusToText(status: number) : string {
+    switch(status) {
+        case 0:
+            return "NEW"
+        case 1:
+            return "IN PROGRESS"
+        case 2:
+            return "FINISHED"
+        default:
+            return "UNKNOWN"
+    }
+}
