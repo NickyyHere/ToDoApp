@@ -13,6 +13,8 @@ namespace ToDoApp.services.interfaces
             Task AddProjectAsync(ProjectDTO projectDTO);
             Task AddTechnologyAsync(string name);
             Task<List<Technology>> GetTechnologiesAsync();
+            Task UpdateProject(ProjectDTO projectDTO, int id);
+            Task UpdateTask(TodoItemDTO todoItemDTO, int id);
         }
     }  
 }

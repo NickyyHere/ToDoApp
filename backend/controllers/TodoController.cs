@@ -1,7 +1,5 @@
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ToDoApp.dto;
-using ToDoApp.models;
 using ToDoApp.services.interfaces.ITodoService;
 
 namespace ToDoApp.controllers 
@@ -56,15 +54,13 @@ namespace ToDoApp.controllers
         [HttpPut("projects/{id}")]
         public async Task<IActionResult> UpdateProject([FromBody] ProjectDTO projectDTO, [FromRoute] int id)
         {
-            Console.WriteLine("AYO");
-            await Task.Delay(1);
+            await _todoService.UpdateProject(projectDTO, id);
             return Ok();
         }
         [HttpPut("tasks/{id}")]
         public async Task<IActionResult> UpdateTask([FromBody] TodoItemDTO todoItemDTO, [FromRoute] int id)
         {
-            Console.WriteLine("AYOO");
-            await Task.Delay(1);
+            await _todoService.UpdateTask(todoItemDTO, id);
             return Ok();
         }
     }

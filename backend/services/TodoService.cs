@@ -67,7 +67,6 @@ namespace ToDoApp.services
             List<TodoItemDTO> itemDTOs = new();
             foreach(TodoItem item in items)
             {
-                Console.WriteLine($"PROJECT NAME: {item.Project.Name}");
                 itemDTOs.Add(new TodoItemDTO(
                     item.Id,
                     item.Project.Name,
@@ -86,7 +85,34 @@ namespace ToDoApp.services
             var technologies = await _technologyRepository.GetAllAsync();
             return technologies;
         }
-
+        public async Task UpdateProject(ProjectDTO projectDTO, int id)
+        {
+            Project? project = await _projectRepository.GetByIdAsync(id);
+            if (project == null)
+                throw new Exception("Project does not exist");
+            
+            project.Name = projectDTO.Name;
+            project.Description = projectDTO.Description;
+            await _projectRepository.UpdateAsync(id, project);
+        }
+        public async Task UpdateTask(TodoItemDTO todoItemDTO, int id)
+        {
+            TodoItem? todoItem = await _todoRepository.GetByIdAsync(id);
+            if(todoItem == null)
+                throw new Exception("Task does not exist");
+            if(todoItemDTO.ProjectName != todoItem.Project.Name) {
+                var project = await _projectRepository.GetByNameAsync(todoItemDTO.ProjectName);
+                if(project == null)
+                    throw new Exception("Couldn't find project");
+                
+                todoItem.Project = project;
+            }
+            var technologies = await _technologyRepository.GetByNamesAsync(todoItemDTO.Technologies);
+            todoItem.Name = todoItemDTO.Name;
+            todoItem.Description = todoItemDTO.Description;
+            todoItem.Technologies = technologies.Select(t => new TodoTechnology{Technology = t}).ToList();
+            await _todoRepository.UpdateAsync(id, todoItem);
+        }
 
         private async Task<List<TodoItem>> GetProjectTasksAsync(Project project)
         {
@@ -101,5 +127,6 @@ namespace ToDoApp.services
             }
             return projectTasks;
         }
+
     }
 }

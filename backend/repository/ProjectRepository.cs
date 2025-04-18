@@ -48,5 +48,10 @@ namespace ToDoApp.repository
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<Project?> GetByNameAsync(string name)
+        {
+            return await _context.Projects.FirstOrDefaultAsync(p => p.Name == name);
+        }
     }
 }
