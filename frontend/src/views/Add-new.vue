@@ -1,14 +1,18 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
-import { formToTypeData, labelAsCheckbox } from '../functions/utils'
+import { formToTypeData, labelAsCheckbox, redirect } from '../functions/utils'
 import { addNewItem, fetchItems } from '../functions/communication'
 import type { TechnologyData } from '../types/ItemData'
 
 const itemType = ref<"tasks" | "projects" | "technologies">("tasks")
 const checkedTechnologies = ref<string[]>([])
+
 const projects = ref<any[]>([])
 const technologies = ref<TechnologyData[]>([])
+
 const validation = ref<string | null>(null)
+
+const notification = ref<string | null>(null)
 
 const formData = ref({
     name: '',
@@ -32,10 +36,17 @@ const sendForm = async () => {
     if(!validateForm()) {
         return
     }
+    let response: number | undefined
     if(formData.value.project == -1) {
-        await addNewItem(itemType.value, formToTypeData(itemType.value, formData.value))
+        response = await addNewItem(itemType.value, formToTypeData(itemType.value, formData.value))
     } else {
-        await addNewItem(itemType.value, formToTypeData(itemType.value, formData.value), formData.value.project)
+        response = await addNewItem(itemType.value, formToTypeData(itemType.value, formData.value), formData.value.project)
+    }
+    if(response == 200)
+        redirect({url: '/', props: {notification: "Item added"}})
+    else {
+        notification.value = "Updating item failed!"
+        setTimeout(() => {notification.value = null}, 3000)
     }
 }
 
@@ -68,6 +79,9 @@ onMounted(async () => {
 
 </script>
 <template>
+    <div class="notification padding p-md border border-thick bg-primary" v-if="notification">
+    <h3 class="font-error">{{ notification }}</h3>
+    </div>
     <div class="flex direction-col text-center">
         <h1>ADD NEW ITEM</h1>
         <hr>

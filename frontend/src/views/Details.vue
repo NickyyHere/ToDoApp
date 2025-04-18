@@ -3,11 +3,12 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { fetchItems, updateItem, deleteItem } from '../functions/communication'
 import type { ProjectData, TaskData } from '../types/ItemData'
-import { formToTypeDataUpdate, isTaskData, labelAsCheckbox, statusToText } from '../functions/utils'
+import { formToTypeDataUpdate, isTaskData, labelAsCheckbox, redirect, statusToText } from '../functions/utils'
 
 const route = useRoute()
 const raw = route.query.data as string
-const data = raw ? JSON.parse(raw) as ProjectData | TaskData: null
+const data = raw ? JSON.parse(raw) as ProjectData | TaskData : null
+
 const isEditing = ref<boolean>(false)
 const checkedTechnologies = ref<string[]>([])
 
@@ -23,6 +24,8 @@ const confimation = ref<string>('')
 const confirmationResult = ref<string | null>(null)
 const viewConfirmation = ref<boolean>(false)
 
+const notification = ref<string | null>('')
+
 const formData = ref({
     name: (data as TaskData | ProjectData).name,
     description: (data as TaskData | ProjectData).description,
@@ -36,7 +39,14 @@ const sendForm = async () => {
         return
     }
     const type = isTaskData(data) ? "tasks" : "projects"
-    await updateItem(type, formToTypeDataUpdate(type, formData.value), data?.id as number)
+    const response = await updateItem(type, formToTypeDataUpdate(type, formData.value), data?.id as number)
+    if(response == 200)
+        redirect({url: '/', props: {notification: "Item updated successfuly"}})
+    else {
+        notification.value = "Updating item failed!"
+        viewConfirmation.value = false
+        setTimeout(() => {notification.value = null}, 3000)
+    }
 }
 
 function validateForm(): boolean  {
@@ -58,16 +68,24 @@ function validateForm(): boolean  {
 }
 
 
-function delItem() {
+async function delItem() {
     if(confimation.value !== data?.name + '#' + data?.id) {
         confirmationResult.value = "Invalid input"
         return
     }
-
+    let response: number | undefined
     if(isTaskData(data))
-        deleteItem("tasks", (data as TaskData).id)
+        response = await deleteItem("tasks", (data as TaskData).id)
     else
-        deleteItem("projects", (data as ProjectData).id)
+        response = await deleteItem("projects", (data as ProjectData).id)
+
+    if(response == 200)
+        redirect({url: '/', props: {notification: "Item deleted successfuly"}})
+    else {
+        notification.value = "Deleting item failed!"
+        viewConfirmation.value = false
+        setTimeout(() => {notification.value = null}, 3000)
+    }
 }
 
 onMounted(async () => {
@@ -76,13 +94,16 @@ onMounted(async () => {
 })
 </script>
 <template>
+    <div class="notification padding p-md border border-thick bg-primary" v-if="notification">
+        <h3 class="font-error">{{ notification }}</h3>
+    </div>
     <div v-if="viewConfirmation" class="cover bg-primary padding p-lg border border-thicker">
         <div class="close font-xxl" @click="viewConfirmation=false">X</div>
         <div class="cover-item absolute-center bg-primary border border-thicker padding p-lg flex justify-center direction-col text-center">
             <h3>CONFIRM DELETING ITEM</h3>
             <hr>
             <h3>Type name and id of item to delete</h3>
-            <p class="error" v-if="confirmationResult">{{ confirmationResult }}</p>
+            <p class="font-error font-xl" v-if="confirmationResult">{{ confirmationResult }}</p>
             <div>
                 <input type="text" :placeholder="'NAME#ID'" class="font-xxl padding p-xs" v-model="confimation">
             </div>
