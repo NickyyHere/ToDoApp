@@ -110,12 +110,16 @@ onMounted(async () => {
                 </select>
             </div>
             <div v-if="itemType === 'tasks'" class="select-none margin-top margin-bottom m-md">
-                <div class="inline-block" v-for="technology in technologies">
-                    <label :for="technology.name" class="checkbox font-xxl padding p-xs margin m-xs" @click="labelAsCheckbox($event.target as HTMLElement, checkedTechnologies)">{{ technology.name }}</label>
-                    <input type="checkbox" :name="technology.name" :value="technology.name" class="hidden">
+                <p for="project" class="text-center block font-xxl margin-top m-md margin-bottom">TECHNOLOGIES</p>
+                <div class="flex justify-center align-start wrap gap-md">
+                    <div v-for="technology in technologies">
+                        <label :for="technology.name" class="checkbox font-xxl padding p-xs" @click="labelAsCheckbox($event.target as HTMLElement, checkedTechnologies)">{{ technology.name }}</label>
+                        <input type="checkbox" :name="technology.name" :value="technology.name" class="hidden">
+                    </div>
                 </div>
+                
             </div>
-            <button type="submit" class="font-xxl padding p-xs rounded">Submit</button>
+            <button type="submit" class="font-xxl padding p-xs rounded margin-top m-md">Submit</button>
         </form>
     </div>
 </template>
