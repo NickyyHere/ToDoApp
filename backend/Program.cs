@@ -5,10 +5,10 @@ using ToDoApp.repository;
 using ToDoApp.services.interfaces.ITodoService;
 using ToDoApp.services;
 using System.Text.Json.Serialization;
+using ToDoApp.services.interfaces;
+using ToDoApp.factory;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
 
 builder.Services.AddOpenApi();
 
@@ -32,10 +32,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 AppContext.SetSwitch("Nphsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddScoped<ITodoService, TodoService>();
+builder.Services.AddScoped<TodoItemFactory>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ITechnologyService, TechnologyService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ITechnologyRepository, TechnologyRepository>();
-
 
 var app = builder.Build();
 

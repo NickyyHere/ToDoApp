@@ -2,30 +2,39 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Column from '../components/Column.vue'
-import { fetchItems } from '../functions/communication'
 import { filterDataByStatus, redirect } from '../functions/utils'
-import type { ProjectData, TaskData } from '../types/ItemData'
+import type { ProjectDTO, TaskDTO } from '../types/ItemData'
+import { Type } from '../types/types'
+import { fetchProjects, fetchTasks } from '../functions/communication'
 
 const route = useRoute()
 const raw = route.query.data as string
 const notificationData = raw ? JSON.parse(raw) as {notification: string} : null
 
 const notification = ref<string | null>('')
+const fetchType = ref<Type.task | Type.project>(Type.task)
 
-const fetchType = ref<"tasks" | "projects">("tasks")
-const newItems = ref<TaskData[] | ProjectData[]>([])
-const inProgressItems = ref<TaskData[] | ProjectData[]>([])
-const finishedItems = ref<TaskData[] | ProjectData[]>([])
+const newItems = ref<TaskDTO[] | ProjectDTO[]>([])
+const inProgressItems = ref<TaskDTO[] | ProjectDTO[]>([])
+const finishedItems = ref<TaskDTO[] | ProjectDTO[]>([])
 
 watch(fetchType, async(newType) => {
-    const data = await fetchItems(newType)
-    newItems.value = await filterDataByStatus(data as ProjectData[], 0)
-    inProgressItems.value = await filterDataByStatus(data as ProjectData[], 1)
-    finishedItems.value = await filterDataByStatus(data as ProjectData[], 2)
+    let data
+    switch(newType) {
+        case Type.project:
+            data = await fetchProjects()
+            break
+        case Type.task:
+            data = await fetchTasks()
+            break
+    }
+    newItems.value = await filterDataByStatus(data, 0)
+    inProgressItems.value = await filterDataByStatus(data, 1)
+    finishedItems.value = await filterDataByStatus(data, 2)
 }, {immediate: true})
 
 const switchFetchType = () => {
-    fetchType.value = fetchType.value == "tasks" ? "projects" : "tasks"
+    fetchType.value = fetchType.value == Type.task ? Type.project : Type.task
 }
 
 onMounted(() => {

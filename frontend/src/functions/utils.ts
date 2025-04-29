@@ -1,7 +1,7 @@
 import router from "../router";
-import type { ProjectData, TaskData } from "../types/ItemData";
+import type { ProjectDTO, TaskDTO } from "../types/ItemData";
 
-export async function filterDataByStatus(data: TaskData[] | ProjectData[], status: number) : Promise<TaskData[] | ProjectData[]>{
+export async function filterDataByStatus(data: TaskDTO[] | ProjectDTO[], status: number) : Promise<TaskDTO[] | ProjectDTO[]>{
     return data.filter(item => item.status == status)
 }
 
@@ -14,72 +14,7 @@ export function redirect(options: string | { url: string, props?: any }) {
     }
   }
 
-export function formToTypeData(type: string, formData: {
-    name: string
-    description: string
-    project: number
-    technologies: string[]
-}) : TaskData | ProjectData | string {
-    switch(type) {
-        case "tasks":
-            return {
-                name: formData.name,
-                description: formData.description,
-                technologies: formData.technologies,
-                startDate: new Date().toISOString(),
-                finishDate: null,
-                projectName: '',
-                id: -1,
-                status: 0
-            } as TaskData
-        case "projects":
-            return {
-                name: formData.name,
-                description: formData.description,
-                id: -1,
-                status: 0,
-                startDate: new Date().toISOString(),
-                finishDate: null
-            } as ProjectData
-        case "technologies":
-            return formData.name
-            
-    }
-    return ""
-}
-
-export function formToTypeDataUpdate(type: string, formData: {
-    name: string
-    description: string
-    projectName: string
-    technologies: string[]
-}) : TaskData | ProjectData {
-    switch(type) {
-        case "tasks":
-            return {
-                name: formData.name,
-                description: formData.description,
-                technologies: formData.technologies,
-                startDate: new Date().toISOString(),
-                finishDate: null,
-                projectName: formData.projectName,
-                id: -1,
-                status: 0
-            } as TaskData
-        case "projects":
-            return {
-                name: formData.name,
-                description: formData.description,
-                id: -1,
-                status: 0,
-                startDate: new Date().toISOString(),
-                finishDate: null
-            } as ProjectData
-    }
-    return {} as TaskData
-}
-
-export function isTaskData(obj: any) : obj is TaskData {
+export function isTaskData(obj: any) : obj is TaskDTO {
     return (
         obj &&
         typeof obj.projectName === 'string'
@@ -101,7 +36,6 @@ export function labelAsCheckbox(target: HTMLElement, checkedTechnologies: string
                 break
             }
         }
-
         if(index == null) {
             checkedTechnologies.push(technology)
         } else {
@@ -120,5 +54,19 @@ export function statusToText(status: number) : string {
             return "FINISHED"
         default:
             return "UNKNOWN"
+    }
+}
+
+export function processResponseStatus(status: number, onSuccess?: () => void, onError?: () => void, onMissing?: () => void) {
+    switch(status) {
+        case 200:
+            onSuccess?.()
+            break
+        case 404:
+            onMissing?.()
+            break
+        case 400:
+            onError?.()
+            break
     }
 }

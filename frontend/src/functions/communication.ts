@@ -1,7 +1,8 @@
-import type { ProjectData, TaskData, TechnologyData } from "../types/ItemData";
+import type { CreateProjectDTO, CreateTaskDTO, CreateTechnologyDTO, ProjectDTO, TaskDTO, TechnologyDTO } from "../types/ItemData";
 import axios from 'axios'
+import { Type } from "../types/types";
 
-export async function fetchItems(type: string) : Promise<TaskData[] | ProjectData[] | TechnologyData[]> {
+async function fetchItems(type: Type) {
     try {
         const response = await axios.get(`http://localhost:5000/api/todo/${type}`)
         return response.data
@@ -11,12 +12,9 @@ export async function fetchItems(type: string) : Promise<TaskData[] | ProjectDat
     }
 }
 
-export async function addNewItem(type: string, data: TaskData | ProjectData | string, projectId: number | null = null) {
+async function addNewItem(type: Type, data: CreateTaskDTO | CreateProjectDTO | CreateTechnologyDTO) {
     try {
         let url = `http://localhost:5000/api/todo/${type}`
-        if(projectId != null) {
-            url += `/${projectId}`
-        }
         const response = await axios.post(url, JSON.stringify(data),
     {
         headers: {
@@ -29,7 +27,7 @@ export async function addNewItem(type: string, data: TaskData | ProjectData | st
     }
 }
 
-export async function updateItem(type: string, data: TaskData | ProjectData, id: number) {
+async function updateItem(type: Type, data: CreateTaskDTO | CreateProjectDTO, id: number) {
     try {
         let url = `http://localhost:5000/api/todo/${type}/${id}`
         const response = await axios.put(url, JSON.stringify(data),
@@ -44,7 +42,7 @@ export async function updateItem(type: string, data: TaskData | ProjectData, id:
     }
 }
 
-export async function deleteItem(type: string, id: number) {
+async function deleteItem(type: Type, id: number) {
     try {
         let url = `http://localhost:5000/api/todo/${type}/${id}`
         const response = await axios.delete(url)
@@ -54,7 +52,7 @@ export async function deleteItem(type: string, id: number) {
     }
 }
 
-export async function changeItemStatus(type: string, id: number) {
+async function changeItemStatus(type: Type, id: number) {
     try {
         let url = `http://localhost:5000/api/todo/${type}/status/${id}`
         const response = await axios.put(url)
@@ -63,3 +61,44 @@ export async function changeItemStatus(type: string, id: number) {
         console.error(`Error updating ${type}: ${error}`)
     }
 }
+
+export async function fetchTasks() : Promise<TaskDTO[]> {
+    return fetchItems(Type.task)
+}
+export async function fetchProjects() : Promise<ProjectDTO[]> {
+    return fetchItems(Type.project)
+}
+export async function fetchTechnologies() : Promise<TechnologyDTO[]> {
+    return fetchItems(Type.technology)
+}
+export async function addNewTask(data: CreateTaskDTO) : Promise<number> {
+    return await addNewItem(Type.task, data) as number
+}
+export async function addNewProject(data: CreateProjectDTO) : Promise<number> {
+    return await addNewItem(Type.project, data) as number
+}
+export async function addNewTechnology(data: CreateTechnologyDTO) : Promise<number> {
+    return await addNewItem(Type.technology, data) as number
+}
+export async function updateTask(data: CreateTaskDTO, id: number) : Promise<number> {
+    return await updateItem(Type.task, data, id) as number
+}
+export async function updateProject(data: CreateProjectDTO, id: number) : Promise<number> {
+    return await updateItem(Type.project, data, id) as number
+}
+export async function changeStatus(type: Type, id: number) : Promise<number> {
+    return await changeItemStatus(type, id) as number
+}
+export async function deleteTask(id: number) : Promise<number> {
+    return await deleteItem(Type.task, id) as number 
+}
+export async function deleteProject(id: number) : Promise<number> {
+    return await deleteItem(Type.project, id) as number
+}
+export async function changeTaskStatus(id: number) : Promise<number> {
+    return await changeItemStatus(Type.task, id) as number
+}
+export async function changeProjectStatus(id: number) : Promise<number> {
+    return await changeItemStatus(Type.project, id) as number
+}
+

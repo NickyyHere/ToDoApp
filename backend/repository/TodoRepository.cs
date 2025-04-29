@@ -44,9 +44,13 @@ namespace ToDoApp.repository
 
         public async Task UpdateAsync(int id, TodoItem newItem)
         {
-            var item = await _context.TodoItems.FindAsync(id);
+            var item = await _context.TodoItems
+                .Include(t => t.Technologies)
+                .FirstOrDefaultAsync(t => t.Id == id);
             if(item != null)
             {
+                _context.TodoTechnologies.RemoveRange(_context.TodoTechnologies.Where(t => t.Item == item).ToList());
+
                 _context.Entry(item).CurrentValues.SetValues(newItem);
                 await _context.SaveChangesAsync();
             }

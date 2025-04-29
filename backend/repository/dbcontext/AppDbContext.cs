@@ -21,12 +21,14 @@ namespace ToDoApp.repository.dbcontext
             modelBuilder.Entity<TodoTechnology>()
                 .HasOne(it => it.Item)
                 .WithMany(i => i.Technologies)
-                .HasForeignKey(it => it.ItemId);
+                .HasForeignKey(it => it.ItemId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<TodoTechnology>()
                 .HasOne(it => it.Technology)
                 .WithMany(t => t.TodoTechnologies)
-                .HasForeignKey(it => it.TechnologyId);
+                .HasForeignKey(it => it.TechnologyId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

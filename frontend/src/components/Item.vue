@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { redirect, isTaskData } from '../functions/utils';
-import type { ProjectData, TaskData } from '../types/ItemData';
+import type { TaskDTO, ProjectDTO } from '../types/ItemData';
     const props = defineProps<{
-        itemData: TaskData | ProjectData
+        itemData: TaskDTO | ProjectDTO
     }>()
     const finishDate = props.itemData.finishDate == null ? "ONGOING" : new Date(props.itemData.finishDate).toLocaleDateString()
 </script>

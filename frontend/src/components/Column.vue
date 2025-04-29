@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { ProjectData, TaskData } from '../types/ItemData';
+import type { ProjectDTO, TaskDTO } from '../types/ItemData';
 import Item from './Item.vue';
 
     defineProps<{
         title: string
-        data: TaskData[] | ProjectData[]
+        data: TaskDTO[] | ProjectDTO[]
     }>()
 </script>
 <template>

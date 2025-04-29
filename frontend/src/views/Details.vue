@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchItems, updateItem, deleteItem, changeItemStatus } from '../functions/communication'
-import type { ProjectData, TaskData } from '../types/ItemData'
-import { formToTypeDataUpdate, isTaskData, labelAsCheckbox, redirect, statusToText } from '../functions/utils'
+import { changeProjectStatus, changeTaskStatus, deleteProject, deleteTask, fetchProjects, fetchTechnologies } from '../functions/communication'
+import type { ProjectDTO, TechnologyDTO } from '../types/ItemData'
+import { isTaskData, labelAsCheckbox, processResponseStatus, redirect, statusToText } from '../functions/utils'
+import { sendForm } from '../functions/form_utils'
+import { Action, Type } from '../types/types'
 
 const route = useRoute()
 const raw = route.query.data as string
-const data = raw ? JSON.parse(raw) as ProjectData | TaskData : null
+const data = raw ? JSON.parse(raw) : null
 
 const isEditing = ref<boolean>(false)
 const checkedTechnologies = ref<string[]>([])
 
-const projects =  ref<ProjectData[]>([])
-const technologies = ref<TaskData[]>([])
+const projects =  ref<ProjectDTO[]>([])
+const technologies = ref<TechnologyDTO[]>([])
 
 const startDate = new Date((data?.startDate) as string)
 const finishDate = data?.finishDate == null ? "ONGOING" : new Date(data.finishDate).toLocaleDateString()
@@ -26,93 +28,66 @@ const viewConfirmation = ref<boolean>(false)
 
 const blockStatusChange = ref<boolean>(false)
 
-const notification = ref<string | null>('')
-
 const formData = ref({
-    name: (data as TaskData | ProjectData).name,
-    description: (data as TaskData | ProjectData).description,
-    projectName: (data as TaskData).projectName,
-    technologies: new Array<string>
+    name: data?.name || "",
+    description: data?.description || "",
+    projectId: -1,
+    technologyNames: new Array<string>
 })
 
-const sendForm = async () => {
-    formData.value.technologies = checkedTechnologies.value
-    if(!validateForm()) {
-        return
+const id = data.id
+const type = isTaskData(data) ? Type.task : Type.project
+
+const handleDelete = async () => {
+    let status: number
+    const onSuccess = () => {redirect("/")}
+    const onError = () => {}
+    const onMissing = () => {}
+    switch(type) {
+        case Type.project:
+            status = await deleteProject(id)
+            break
+        case Type.task:
+            status = await deleteTask(id)
+            break
     }
-    const type = isTaskData(data) ? "tasks" : "projects"
-    const response = await updateItem(type, formToTypeDataUpdate(type, formData.value), data?.id as number)
-    if(response == 200)
-        redirect({url: '/', props: {notification: "Item updated successfuly"}})
-    else {
-        notification.value = "Updating item failed!"
-        viewConfirmation.value = false
-        setTimeout(() => {notification.value = null}, 3000)
-    }
+    processResponseStatus(status, onSuccess, onError, onMissing)
 }
-
-function validateForm(): boolean  {
-    if(formData.value.name.length == 0) {
-        validation.value = "Name can't be empty"
-        return false
-    }
-    if (formData.value.description.length == 0) {
-        validation.value = "Description can't be empty"
-        return false
-    }
-    if(isTaskData(data)) {
-        if(formData.value.technologies.length == 0) {
-            validation.value = "Select technologies"
-            return false
-        }
-    }
-    return true
-}
-
-
-async function delItem() {
-    if(confimation.value !== data?.name + '#' + data?.id) {
-        confirmationResult.value = "Invalid input"
-        return
-    }
-    let response: number | undefined
-    if(isTaskData(data))
-        response = await deleteItem("tasks", (data as TaskData).id)
-    else
-        response = await deleteItem("projects", (data as ProjectData).id)
-
-    if(response == 200)
-        redirect({url: '/', props: {notification: "Item deleted successfuly"}})
-    else {
-        notification.value = "Deleting item failed!"
-        viewConfirmation.value = false
-        setTimeout(() => {notification.value = null}, 3000)
-    }
-}
-
-async function changeStatus() {
-    const type = isTaskData(data) ? "tasks" : "projects"
-    let response = await changeItemStatus(type, (data as ProjectData | TaskData).id)
-    if(response == 200) {
-        notification.value = "Status changed";
-        (data as TaskData | ProjectData).status += 1
+const handleChangeStatus = async() => {
+    let status: number
+    const onSuccess = () => {
         blockStatusChange.value = true
-        setTimeout(() => {notification.value = null}, 3000)
-    }else {
-        notification.value = "Status changing failed!"
-        setTimeout(() => {notification.value = null}, 3000)
+        data.status += 1
     }
+    const onError = () => {}
+    const onMissing = () => {}
+    switch(type) {
+        case Type.project:
+            status = await changeProjectStatus(id)
+            break
+        case Type.task:
+            status = await changeTaskStatus(id)
+            break
+    }
+    processResponseStatus(status, onSuccess, onError, onMissing)
+}
+const handleUpdate = async() => {
+    let status: number
+    const onSuccess = () => {redirect("/")}
+    const onError = () => {}
+    const onMissing = () => {}
+    formData.value.technologyNames = checkedTechnologies.value
+    status = await sendForm(Action.update, type, formData.value, data?.id)
+    processResponseStatus(status, onSuccess, onError, onMissing)
 }
 
 onMounted(async () => {
-    projects.value = (await fetchItems("projects")) as ProjectData[]
-    technologies.value = (await fetchItems("technologies")) as TaskData[]
+    projects.value = await fetchProjects()
+    technologies.value = await fetchTechnologies()
 })
 </script>
 <template>
-    <div class="notification padding p-md border border-thick bg-primary" v-if="notification">
-        <h3 class="font-error">{{ notification }}</h3>
-    </div>
+    <!-- Confirmation for deleting item -->
     <div v-if="viewConfirmation" class="cover bg-primary padding p-lg border border-thicker">
         <div class="close font-xxl" @click="viewConfirmation=false">X</div>
         <div class="cover-item absolute-center bg-primary border border-thicker padding p-lg flex justify-center direction-col text-center">
@@ -123,73 +98,94 @@ onMounted(async () => {
             <div>
                 <input type="text" :placeholder="'NAME#ID'" class="font-xxl padding p-xs" v-model="confimation">
             </div>
-            <button class="padding p-xs margin m-md" @click="delItem()">CONFIRM</button>
+            <button class="padding p-xs margin m-md" @click="handleDelete">CONFIRM</button>
         </div>
     </div>
+    <!-- Main -->
     <div class="text-center">
+        <!-- If editing: header -->
         <div v-if="isEditing">
             <h2>
                 {{ isTaskData(data) ? "TASK" : "PROJECT" }} #{{ data?.id }}
             </h2>
             <p v-if="validation" class="font-error margin-top m-lg font-xl">{{ validation }}</p>
         </div>
-        <form @submit.prevent="sendForm">
+        <!-- on submit call sendForm() -->
+        <form @submit.prevent="handleUpdate">
+            <!-- If editing, input for name -->
             <div v-if="isEditing">
                 <div>
                     <label for="name" class="font-xxl">NAME</label><br>
                     <input name="name" class="padding p-xs font-xl text-center" v-model="formData.name">
                 </div>
             </div>
+            <!-- If viewing details, show Name#Id -->
             <div v-else>
                 <h2>{{ data?.name }}<span class="absolute text-color-muted">#{{ data?.id }}</span></h2>
             </div>
+            <!-- If editing, and viewed item is a task, select for project THE VALUE IS A STRING FFS WHY AM I RETARDED -->
             <div v-if="isEditing">
                 <div v-if="isTaskData(data)">
                     <label for="projectName" class="font-xxl">PROJECT</label><br>
-                    <select name="projectName" class="padding p-xs font-xl text-center" v-model="formData.projectName">
-                        <option v-for="project in projects" :value="project.name">{{ project.name }}</option>
+                    <select name="projectName" class="padding p-xs font-xl text-center" v-model="formData.projectId">
+                        <option v-for="project in projects" :value="project.id">{{ project.name }}</option>
                     </select>
                 </div>
             </div>
+            <!-- If viewing details for a task, show project name -->
             <div v-else>
                 <p v-if="isTaskData(data)" class="font-xl">{{ data?.projectName }}</p>
             </div>
+            <!-- If editing, textarea for description -->
             <div v-if="isEditing">
                 <div>
                     <label for="description" class="font-xxl">DESCRIPTION</label><br>
                     <textarea name="description" class="padding p-xs font-xl" v-model="formData.description"></textarea>
                 </div>
             </div>
+            <!-- If viewing details, show description -->
             <div v-else class="margin-top m-md">
                 <hr>
                 <h3>DESCRIPTION</h3>
-                <p class="text-left padding p-lg">{{ data?.description }}</p>
+                <p class="text-justify padding p-lg width-40 margin-left margin-right m-auto">{{ data?.description }}</p>
                 <hr>
             </div>
+            <!-- If editing task, checkboxes for technologies -->
             <div v-if="isEditing">
                 <div v-if="isTaskData(data)">
                     <p class="font-xxl">TECHNOLOGIES</p>
                     <div v-if="isTaskData(data)" class="flex justify-center margin-top m-xs select-none gap-sm">
                         <div v-for="technology in technologies" >
                             <label :for="technology.name" class="border rounded padding p-xs font-xl checkbox" @click="labelAsCheckbox($event.target as HTMLElement, checkedTechnologies)">{{ technology.name }}</label>
-                            <input type="checkbox" :value="technology.name" class="hidden">
+                            <input type="checkbox" :value="technology.name" :name="technology.name" class="hidden">
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- If viewing details show technologies -->
             <div v-else>
                 <div v-if="isTaskData(data)" class="flex justify-center margin-top m-md gap-sm">
                     <div v-for="technology in data?.technologies" class="border rounded padding p-xs font-xl">{{ technology }}</div>
                 </div>
             </div>
+            <!-- Buttons if editing -->
             <div v-if="isEditing" class="margin-top m-xl flex justify-center gap-sm">
                 <button class="padding p-xs font-xxl" type="submit">SAVE</button>
                 <button class="padding p-xs font-xxl" @click="isEditing=false" type="button">CANCEL</button>
             </div>
+            <!-- If not editing -->
             <div v-else >
-                <p class="margin-top m-md font-xl">{{ statusToText((data as TaskData | ProjectData).status) }}<button type="button" @click="changeStatus()" class="absolute move margin-left m-xl padding p-xs" v-if="(data as TaskData | ProjectData).status < 2 && !blockStatusChange">Move to {{ statusToText((data as TaskData | ProjectData).status + 1) }}</button></p>
+                <!-- Item status -->
+                <p class="margin-top m-md font-xl">{{ statusToText(data?.status) }}
+                    <!-- Button to change status -->
+                    <button type="button" @click="handleChangeStatus" class="absolute move margin-left m-xl padding p-xs" v-if="data?.status < 2 && !blockStatusChange">
+                        Move to {{ statusToText(data?.status + 1) }}
+                    </button>
+                </p>
+                <!-- Start - Finish date -->
                 <p class="margin-top m-md font-xl">{{ startDate.toLocaleDateString() }} - {{ finishDate }}</p>
-                <div class="margin-top m-xl flex justify-center gap-sm" v-if="(data as TaskData | ProjectData).status < 2">
+                <!-- Buttons -->
+                <div class="margin-top m-xl flex justify-center gap-sm" v-if="data?.status < 2">
                     <button class="padding p-xs font-xxl" type="button" @click="isEditing=true">EDIT</button>
                     <button class="padding p-xs font-xxl" type="button" @click="viewConfirmation=true">DELETE</button>
                 </div>

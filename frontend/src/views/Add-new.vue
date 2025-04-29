@@ -1,24 +1,22 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
-import { formToTypeData, labelAsCheckbox, redirect } from '../functions/utils'
-import { addNewItem, fetchItems } from '../functions/communication'
-import type { TechnologyData } from '../types/ItemData'
+import {  labelAsCheckbox, processResponseStatus, redirect } from '../functions/utils'
+import { fetchProjects, fetchTechnologies } from '../functions/communication'
+import type { ProjectDTO, TechnologyDTO } from '../types/ItemData'
+import { Action, Type } from '../types/types'
+import { sendForm } from '../functions/form_utils'
 
-const itemType = ref<"tasks" | "projects" | "technologies">("tasks")
+const itemType = ref<Type.task | Type.project | Type.technology>(Type.task)
 const checkedTechnologies = ref<string[]>([])
 
-const projects = ref<any[]>([])
-const technologies = ref<TechnologyData[]>([])
-
-const validation = ref<string | null>(null)
-
-const notification = ref<string | null>(null)
+const projects = ref<ProjectDTO[]>([])
+const technologies = ref<TechnologyDTO[]>([])
 
 const formData = ref({
     name: '',
     description: '',
-    project: -1,
-    technologies: new Array<string>
+    projectId: -1,
+    technologyNames: new Array<string>
 })
 
 const handleChangeType = () => {
@@ -27,88 +25,58 @@ const handleChangeType = () => {
     checkedTechnologies.value = []
     formData.value.name = ''
     formData.value.description = ''
-    formData.value.project = -1
-    formData.value.technologies = []
+    formData.value.projectId = -1
+    formData.value.technologyNames = []
 }
-
-const sendForm = async () => {
-    formData.value.technologies = checkedTechnologies.value
-    if(!validateForm()) {
-        return
-    }
-    let response: number | undefined
-    if(formData.value.project == -1) {
-        response = await addNewItem(itemType.value, formToTypeData(itemType.value, formData.value))
-    } else {
-        response = await addNewItem(itemType.value, formToTypeData(itemType.value, formData.value), formData.value.project)
-    }
-    if(response == 200)
-        redirect({url: '/', props: {notification: "Item added"}})
-    else {
-        notification.value = "Updating item failed!"
-        setTimeout(() => {notification.value = null}, 3000)
-    }
+const handleAdd = async () => {
+    let status: number
+    const onSuccess = () => {redirect("/")}
+    const onError = () => {}
+    const onMissing = () => {}
+    formData.value.technologyNames = checkedTechnologies.value
+    status = await sendForm(Action.add, itemType.value, formData.value)
+    processResponseStatus(status, onSuccess, onError, onMissing)
 }
-
-function validateForm(): boolean  {
-    if(formData.value.name.length == 0) {
-        validation.value = "Name can't be empty"
-        return false
-    }
-    if((itemType.value == "tasks" || itemType.value == "projects") && formData.value.description.length == 0) {
-        validation.value = "Description can't be empty"
-        return false
-    }
-    if(itemType.value == "tasks") {
-        if(formData.value.project == -1) {
-            validation.value = "Select a project"
-            return false
-        }
-        if(formData.value.technologies.length == 0) {
-            validation.value = "Select technologies"
-            return false
-        }
-    }
-    return true
-}
-
 onMounted(async () => {
-    projects.value = await fetchItems("projects")
-    technologies.value = await fetchItems("technologies")
+    projects.value = await fetchProjects()
+    technologies.value = await fetchTechnologies()
 })
 
 </script>
 <template>
-    <div class="notification padding p-md border border-thick bg-primary" v-if="notification">
-    <h3 class="font-error">{{ notification }}</h3>
-    </div>
+    <!-- Main -->
     <div class="flex direction-col text-center">
         <h1>ADD NEW ITEM</h1>
         <hr>
-        <p v-if="validation" class="font-error margin-top m-lg font-xl">{{ validation }}</p>
+        <!-- Selecting type of item to add -->
         <div>
             <label for="type" class="text-center block font-xxl margin-top m-md">TYPE</label><br>
             <select v-model="itemType" name="type" @change="handleChangeType" class="font-xl padding p-xs input">
-                <option value="tasks">Task</option>
-                <option value="projects">Project</option>
-                <option value="technologies">Technology</option>
+                <option :value="Type.task">Task</option>
+                <option :value="Type.project">Project</option>
+                <option :value="Type.technology">Technology</option>
             </select>
         </div>
-        <form @submit.prevent="sendForm">
+        <!-- On submit call sendForm() -->
+        <form @submit.prevent="handleAdd">
+            <!-- Input for "name" -->
             <div>
                 <label for="name" class="text-center block font-xxl margin-top m-md">NAME</label><br>
                 <input type="text" name="name" v-model="formData.name" class="font-xl padding p-xs input" required>
             </div>
+            <!-- Input for "description" -->
             <div v-if="itemType === 'tasks' || itemType === 'projects'">
                 <label for="description" class="text-center block font-xxl margin-top m-md">DESCRIPTION</label><br>
                 <textarea name="description" v-model="formData.description" class="font-md padding p-xs description input" required></textarea>
             </div>
+            <!-- Select for project -->
             <div v-if="itemType === 'tasks'">
                 <label for="project" class="text-center block font-xxl margin-top m-md">PROJECT</label>
-                <select name="project" v-model="formData.project" class="font-xl padding p-xs input">
+                <select name="project" v-model="formData.projectId" class="font-xl padding p-xs input">
                     <option v-for="project in projects" :value="project.id"> {{ project.name }} </option>
                 </select>
             </div>
+            <!-- Checkboxes for tasks -->
             <div v-if="itemType === 'tasks'" class="select-none margin-top margin-bottom m-md">
                 <p for="project" class="text-center block font-xxl margin-top m-md margin-bottom">TECHNOLOGIES</p>
                 <div class="flex justify-center align-start wrap gap-md">
