@@ -52,12 +52,13 @@ namespace ToDoApp.services
         }
         public async Task ChangeTaskStatusAsync(int id)
         {
-            var task = await _todoRepository.GetByIdAsync(id) ?? throw new Exception("Project does not exist");
-            if ((int)task.Status++ > (int)Status.FINISHED)
-                throw new Exception("Project is already of finished status");
-            if((int)task.Status == (int)Status.FINISHED)
-                task.FinishDate = DateTime.Now;
-            await _todoRepository.UpdateAsync(id, task);
+            await _todoRepository.ChangeStatusAsync(id);
+        }
+
+        public async Task ImportAsync(TodoItemDTO dto)
+        {
+            TodoItem task = await _taskFactory.BuildAsync(dto);
+            await _todoRepository.AddAsync(task);
         }
     }
 }

@@ -45,9 +45,6 @@ onMounted(() => {
 })
 </script>
 <template>
-    <div class="notification padding p-md border border-thick bg-primary" v-if="notification">
-        <h3>{{ notification }}</h3>
-    </div>
     <div class="text-center">
         <span class="font-xxl text-bold select-none inline-block margin-right m-md type" @click="switchFetchType">{{ fetchType.toUpperCase() }} <i class="fa-solid fa-rotate font-xxl"></i></span>
         <span class="font-xxl text-bold select-none inline-block add-button" @click="redirect('/add-new')">ADD NEW <i class="fa-solid fa-plus font-xxl"></i></span>

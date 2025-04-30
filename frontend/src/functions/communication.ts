@@ -27,6 +27,21 @@ async function addNewItem(type: Type, data: CreateTaskDTO | CreateProjectDTO | C
     }
 }
 
+async function importItem(type: Type, data: TaskDTO | ProjectDTO | TechnologyDTO) {
+    try {
+        let url = `http://localhost:5000/api/todo/import/${type}`
+        const response = await axios.post(url, JSON.stringify(data),
+    {
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    return response.status as number
+    } catch(error) {
+        return 400
+    }
+}
+
 async function updateItem(type: Type, data: CreateTaskDTO | CreateProjectDTO, id: number) {
     try {
         let url = `http://localhost:5000/api/todo/${type}/${id}`
@@ -79,6 +94,15 @@ export async function addNewProject(data: CreateProjectDTO) : Promise<number> {
 }
 export async function addNewTechnology(data: CreateTechnologyDTO) : Promise<number> {
     return await addNewItem(Type.technology, data) as number
+}
+export async function importTask(data: TaskDTO) : Promise<number> {
+    return await importItem(Type.task, data)
+}
+export async function importProject(data: ProjectDTO) : Promise<number> {
+    return await importItem(Type.project, data)
+}
+export async function importTechnology(data: TechnologyDTO) : Promise<number> {
+    return await importItem(Type.technology, data)
 }
 export async function updateTask(data: CreateTaskDTO, id: number) : Promise<number> {
     return await updateItem(Type.task, data, id) as number

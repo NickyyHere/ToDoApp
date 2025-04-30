@@ -3,8 +3,9 @@ import { onMounted, ref } from 'vue'
 import {  labelAsCheckbox, processResponseStatus, redirect } from '../functions/utils'
 import { fetchProjects, fetchTechnologies } from '../functions/communication'
 import type { ProjectDTO, TechnologyDTO } from '../types/ItemData'
-import { Action, Type } from '../types/types'
+import { Action, MessageType, Type } from '../types/types'
 import { sendForm } from '../functions/form_utils'
+import emitter from '../types/emitter'
 
 const itemType = ref<Type.task | Type.project | Type.technology>(Type.task)
 const checkedTechnologies = ref<string[]>([])
@@ -30,9 +31,16 @@ const handleChangeType = () => {
 }
 const handleAdd = async () => {
     let status: number
-    const onSuccess = () => {redirect("/")}
-    const onError = () => {}
-    const onMissing = () => {}
+    const onSuccess = () => {
+        redirect("/")
+        emitter.emit("showNotification", {messageType: MessageType.success, message: "Successfuly added new item"})
+    }
+    const onError = () => {
+        emitter.emit("showNotification", {messageType: MessageType.error, message: "Adding new item failed"})
+    }
+    const onMissing = () => {
+        emitter.emit("showNotification", {messageType: MessageType.error, message: "Couldn't find server resource"})
+    }
     formData.value.technologyNames = checkedTechnologies.value
     status = await sendForm(Action.add, itemType.value, formData.value)
     processResponseStatus(status, onSuccess, onError, onMissing)

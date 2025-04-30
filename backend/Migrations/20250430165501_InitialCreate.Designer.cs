@@ -12,8 +12,8 @@ using ToDoApp.repository.dbcontext;
 namespace ToDoApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250416141722_ChangedReferenceFromTodoItemDTOToString")]
-    partial class ChangedReferenceFromTodoItemDTOToString
+    [Migration("20250430165501_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,6 +58,9 @@ namespace ToDoApp.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Projects");
                 });
 
@@ -75,6 +78,9 @@ namespace ToDoApp.Migrations
                         .HasColumnName("Name");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Technologies");
                 });
@@ -114,6 +120,9 @@ namespace ToDoApp.Migrations
                         .HasColumnName("Status");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.HasIndex("ProjectId");
 

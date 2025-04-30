@@ -6,6 +6,7 @@ namespace ToDoApp.dto
     public class TodoItemDTO
     {
         public int Id { get; set; }
+        public int ProjectId { get; set; }
         public string ProjectName { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -14,8 +15,9 @@ namespace ToDoApp.dto
         public DateTime? FinishDate { get; set; }
         public List<string> Technologies { get; set; }
 
-        public TodoItemDTO(int id, string projectName, string name, string description, Status status, List<string> technologies, DateTime startDate, DateTime? finishDate = null) {
+        public TodoItemDTO(int id, int projectId, string projectName, string name, string description, Status status, List<string> technologies, DateTime startDate, DateTime? finishDate = null) {
             Id = id;
+            ProjectId = projectId;
             ProjectName = projectName;
             Name = name;
             Description = description;

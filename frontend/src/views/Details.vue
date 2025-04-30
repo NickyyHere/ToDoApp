@@ -5,7 +5,8 @@ import { changeProjectStatus, changeTaskStatus, deleteProject, deleteTask, fetch
 import type { ProjectDTO, TechnologyDTO } from '../types/ItemData'
 import { isTaskData, labelAsCheckbox, processResponseStatus, redirect, statusToText } from '../functions/utils'
 import { sendForm } from '../functions/form_utils'
-import { Action, Type } from '../types/types'
+import { Action, MessageType, Type } from '../types/types'
+import emitter from '../types/emitter'
 
 const route = useRoute()
 const raw = route.query.data as string
@@ -20,13 +21,15 @@ const technologies = ref<TechnologyDTO[]>([])
 const startDate = new Date((data?.startDate) as string)
 const finishDate = data?.finishDate == null ? "ONGOING" : new Date(data.finishDate).toLocaleDateString()
 
-const validation = ref<string | null>(null)
-
 const confimation = ref<string>('')
 const confirmationResult = ref<string | null>(null)
 const viewConfirmation = ref<boolean>(false)
 
 const blockStatusChange = ref<boolean>(false)
+
+const onMissing = () => {
+    emitter.emit("showNotification", {messageType: MessageType.error, message: "Coulnd't find resource"})
+}
 
 const formData = ref({
     name: data?.name || "",
@@ -40,9 +43,13 @@ const type = isTaskData(data) ? Type.task : Type.project
 
 const handleDelete = async () => {
     let status: number
-    const onSuccess = () => {redirect("/")}
-    const onError = () => {}
-    const onMissing = () => {}
+    const onSuccess = () => {
+        redirect("/")
+        emitter.emit("showNotification", {messageType: MessageType.success, message: "Item deleted"})
+    }
+    const onError = () => {
+        emitter.emit("showNotification", {messageType: MessageType.success, message: "Item deletion failed"})
+    }
     switch(type) {
         case Type.project:
             status = await deleteProject(id)
@@ -58,9 +65,11 @@ const handleChangeStatus = async() => {
     const onSuccess = () => {
         blockStatusChange.value = true
         data.status += 1
+        emitter.emit("showNotification", {messageType: MessageType.success, message: "Item status changed"})
     }
-    const onError = () => {}
-    const onMissing = () => {}
+    const onError = () => {
+        emitter.emit("showNotification", {messageType: MessageType.success, message: "Failed to change item status"})
+    }
     switch(type) {
         case Type.project:
             status = await changeProjectStatus(id)
@@ -73,9 +82,13 @@ const handleChangeStatus = async() => {
 }
 const handleUpdate = async() => {
     let status: number
-    const onSuccess = () => {redirect("/")}
-    const onError = () => {}
-    const onMissing = () => {}
+    const onSuccess = () => {
+        redirect("/")
+        emitter.emit("showNotification", {messageType: MessageType.success, message: "Item updated"})
+    }
+    const onError = () => {
+        emitter.emit("showNotification", {messageType: MessageType.error, message: "Failed updating item"})
+    }
     formData.value.technologyNames = checkedTechnologies.value
     status = await sendForm(Action.update, type, formData.value, data?.id)
     processResponseStatus(status, onSuccess, onError, onMissing)
@@ -94,7 +107,7 @@ onMounted(async () => {
             <h3>CONFIRM DELETING ITEM</h3>
             <hr>
             <h3>Type name and id of item to delete</h3>
-            <p class="font-error font-xl" v-if="confirmationResult">{{ confirmationResult }}</p>
+            <p class="text-color-error font-xl" v-if="confirmationResult">{{ confirmationResult }}</p>
             <div>
                 <input type="text" :placeholder="'NAME#ID'" class="font-xxl padding p-xs" v-model="confimation">
             </div>
@@ -108,7 +121,6 @@ onMounted(async () => {
             <h2>
                 {{ isTaskData(data) ? "TASK" : "PROJECT" }} #{{ data?.id }}
             </h2>
-            <p v-if="validation" class="font-error margin-top m-lg font-xl">{{ validation }}</p>
         </div>
         <!-- on submit call sendForm() -->
         <form @submit.prevent="handleUpdate">
@@ -127,7 +139,7 @@ onMounted(async () => {
             <div v-if="isEditing">
                 <div v-if="isTaskData(data)">
                     <label for="projectName" class="font-xxl">PROJECT</label><br>
-                    <select name="projectName" class="padding p-xs font-xl text-center" v-model="formData.projectId">
+                    <select name="projectName" class="padding p-xs font-xl text-center" v-model="formData.projectId" required>
                         <option v-for="project in projects" :value="project.id">{{ project.name }}</option>
                     </select>
                 </div>
@@ -154,7 +166,7 @@ onMounted(async () => {
             <div v-if="isEditing">
                 <div v-if="isTaskData(data)">
                     <p class="font-xxl">TECHNOLOGIES</p>
-                    <div v-if="isTaskData(data)" class="flex justify-center margin-top m-xs select-none gap-sm">
+                    <div v-if="isTaskData(data)" class="flex justify-center margin-top m-xs select-none gap-sm wrap">
                         <div v-for="technology in technologies" >
                             <label :for="technology.name" class="border rounded padding p-xs font-xl checkbox" @click="labelAsCheckbox($event.target as HTMLElement, checkedTechnologies)">{{ technology.name }}</label>
                             <input type="checkbox" :value="technology.name" :name="technology.name" class="hidden">
@@ -164,7 +176,7 @@ onMounted(async () => {
             </div>
             <!-- If viewing details show technologies -->
             <div v-else>
-                <div v-if="isTaskData(data)" class="flex justify-center margin-top m-md gap-sm">
+                <div v-if="isTaskData(data)" class="flex justify-center margin-top m-md gap-sm wrap">
                     <div v-for="technology in data?.technologies" class="border rounded padding p-xs font-xl">{{ technology }}</div>
                 </div>
             </div>

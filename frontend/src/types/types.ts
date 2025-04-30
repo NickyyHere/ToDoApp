@@ -10,3 +10,9 @@ export enum Action {
     fetch,
     delete
 }
+
+export enum MessageType {
+    notification = "text-color-primary",
+    success = "text-color-success",
+    error = "text-color-error"
+}

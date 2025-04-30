@@ -55,6 +55,9 @@ namespace ToDoApp.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Projects");
                 });
 
@@ -72,6 +75,9 @@ namespace ToDoApp.Migrations
                         .HasColumnName("Name");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Technologies");
                 });
@@ -111,6 +117,9 @@ namespace ToDoApp.Migrations
                         .HasColumnName("Status");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.HasIndex("ProjectId");
 

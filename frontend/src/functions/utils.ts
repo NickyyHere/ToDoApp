@@ -1,5 +1,6 @@
 import router from "../router";
-import type { ProjectDTO, TaskDTO } from "../types/ItemData";
+import type { CreateProjectDTO, CreateTaskDTO, CreateTechnologyDTO, ProjectDTO, TaskDTO, TechnologyDTO } from "../types/ItemData";
+import { Type } from "../types/types";
 
 export async function filterDataByStatus(data: TaskDTO[] | ProjectDTO[], status: number) : Promise<TaskDTO[] | ProjectDTO[]>{
     return data.filter(item => item.status == status)
@@ -69,4 +70,56 @@ export function processResponseStatus(status: number, onSuccess?: () => void, on
             onError?.()
             break
     }
+}
+
+export async function generateExportJSON(projects?: ProjectDTO[], technologies?: TechnologyDTO[], tasks?: TaskDTO[]) : Promise<{
+    projects: ProjectDTO[], 
+    technologies: TechnologyDTO[], 
+    tasks: TaskDTO[]
+}> {
+    const exportJSON: {
+        projects: ProjectDTO[]
+        technologies: TechnologyDTO[]
+        tasks: TaskDTO[]
+    } = {
+        "projects": [],
+        "technologies": [],
+        "tasks": []
+    }
+    if(projects != null) {
+        projects.forEach(project => {
+            exportJSON.projects.push({
+                id: project.id,
+                name: project.name,
+                description: project.description,
+                startDate: project.startDate,
+                finishDate: project.finishDate,
+                status: project.status
+            })
+        })
+    }
+    if(technologies != null) {
+        technologies.forEach(technology => {
+            exportJSON.technologies.push({
+                id: technology.id,
+                name: technology.name
+            })
+        })
+    }
+    if(tasks != null)
+        
+    tasks.forEach(task => {
+        exportJSON.tasks.push({
+            id: task.id,
+            projectId: task.projectId,
+            name: task.name,
+            description: task.description,
+            projectName: task.projectName,
+            technologies: task.technologies,
+            startDate: task.startDate,
+            finishDate: task.finishDate,
+            status: task.status
+        })
+    })
+    return exportJSON
 }

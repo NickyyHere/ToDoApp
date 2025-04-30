@@ -261,6 +261,10 @@ body * {
   gap: 2rem;
 }
 
+.gap-xxxl {
+  gap: 3rem;
+}
+
 .grow-1 {
   flex-grow: 1;
 }
@@ -340,6 +344,14 @@ body * {
   opacity: .1;
 }
 
+.text-color-error {
+  color: var(--error);
+}
+
+.text-color-success {
+  color: var(--accent-color)
+}
+
 h1 {
   font-size: 5rem;
 }
@@ -408,10 +420,6 @@ a {
 
 a:hover {
   color: var(--secondary-color);
-}
-
-.font-error {
-  color: var(--error);
 }
 
 /*
@@ -497,11 +505,4 @@ button:hover {
 }
 .close:hover {
   color: var(--primary-color);
-}
-.notification {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
 }

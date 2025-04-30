@@ -12,7 +12,7 @@ namespace ToDoApp.mapper
     {
         public TodoItemDTO ToDTO(TodoItem model)
         {
-            return new TodoItemDTO(model.Id, model.Project.Name, model.Name, model.Description, model.Status, model.Technologies.Select(t => t.Technology.Name).ToList(), model.StartDate, model.FinishDate);
+            return new TodoItemDTO(model.Id, model.Project.Id, model.Project.Name, model.Name, model.Description, model.Status, model.Technologies.Select(t => t.Technology.Name).ToList(), model.StartDate, model.FinishDate);
         }
         public List<TodoItemDTO> ToDTO(List<TodoItem> models)
         {

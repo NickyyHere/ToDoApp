@@ -71,5 +71,11 @@ namespace ToDoApp.services
             }
             return projectTasks;
         }
+
+        public async Task ImportAsync(ProjectDTO dto)
+        {
+            Project project = _projectFactory.Build(dto);
+            await _projectRepository.AddAsync(project);
+        }
     }
 }

@@ -91,6 +91,24 @@ namespace ToDoApp.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Projects_Name",
+                table: "Projects",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Technologies_Name",
+                table: "Technologies",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TodoItems_Name",
+                table: "TodoItems",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TodoItems_ProjectId",
                 table: "TodoItems",
                 column: "ProjectId");

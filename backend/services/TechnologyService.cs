@@ -2,6 +2,7 @@ using ToDoApp.dto;
 using ToDoApp.dto.create;
 using ToDoApp.factory;
 using ToDoApp.mapper;
+using ToDoApp.models;
 using ToDoApp.repository.interfaces;
 using ToDoApp.services.interfaces;
 
@@ -24,6 +25,12 @@ namespace ToDoApp.services
         {
             var technologies = await _technologyRepository.GetAllAsync();
             return _technologyMapper.ToDTO(technologies);
+        }
+
+        public async Task ImportAsync(TechnologyDTO dto)
+        {
+            Technology technology = _technologyFactory.Build(dto);
+            await _technologyRepository.AddAsync(technology);
         }
     }
 }

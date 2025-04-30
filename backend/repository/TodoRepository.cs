@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ToDoApp.models;
 using ToDoApp.repository.dbcontext;
 using ToDoApp.repository.interfaces;
+using ToDoApp.enumerable;
 
 namespace ToDoApp.repository
 {
@@ -39,13 +40,17 @@ namespace ToDoApp.repository
 
         public async Task<TodoItem?> GetByIdAsync(int id)
         {
-            return await _context.TodoItems.FindAsync(id);
+            return await _context.TodoItems
+                .Include(t => t.Technologies)
+                    .ThenInclude(tt => tt.Technology)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task UpdateAsync(int id, TodoItem newItem)
         {
             var item = await _context.TodoItems
                 .Include(t => t.Technologies)
+                    .ThenInclude(tt => tt.Technology)
                 .FirstOrDefaultAsync(t => t.Id == id);
             if(item != null)
             {
@@ -54,6 +59,24 @@ namespace ToDoApp.repository
                 _context.Entry(item).CurrentValues.SetValues(newItem);
                 await _context.SaveChangesAsync();
             }
+        }
+        public async Task ChangeStatusAsync(int id)
+        {
+            var item = await _context.TodoItems
+                .Include(t => t.Technologies)
+                    .ThenInclude(tt => tt.Technology)
+                .FirstOrDefaultAsync(t => t.Id == id);
+            if(item != null)
+            {
+                if(item.Status >= Status.FINISHED) {
+                    throw new Exception("Task already finished");
+                }
+                item.Status++;
+                if(item.Status == Status.FINISHED) {
+                    item.FinishDate = DateTime.Now;
+                }
+            }
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -1,6 +1,5 @@
 using ToDoApp.dto;
 using ToDoApp.dto.create;
-using ToDoApp.models;
 
 namespace ToDoApp.services.interfaces
 {
@@ -13,6 +12,7 @@ namespace ToDoApp.services.interfaces
             Task UpdateTaskAsync(CreateTodoItemDTO createTodoItemDTO, int id);
             Task DeleteTaskAsync(int id);
             Task ChangeTaskStatusAsync(int id);
+            Task ImportAsync(TodoItemDTO dto);
         }
     }  
 }

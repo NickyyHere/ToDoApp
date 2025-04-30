@@ -15,6 +15,18 @@ namespace ToDoApp.repository.dbcontext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Project>()
+                .HasIndex(p => p.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<TodoItem>()
+                .HasIndex(t => t.Name)
+                .IsUnique();
+
+            modelBuilder.Entity<Technology>()
+                .HasIndex(t => t.Name)
+                .IsUnique();
+
             modelBuilder.Entity<TodoTechnology>()
                 .HasKey(it => new { it.ItemId, it.TechnologyId });
 

@@ -56,6 +56,24 @@ namespace ToDoApp.controllers
             await _technologyService.AddTechnologyAsync(createTechnologyDTO);
             return Ok();
         }
+        [HttpPost("import/tasks")]
+        public async Task<IActionResult> ImportTask([FromBody] TodoItemDTO data, [FromRoute] int status)
+        {
+            await _todoService.ImportAsync(data);
+            return Ok();
+        }
+        [HttpPost("import/projects")]
+        public async Task<IActionResult> ImportProject([FromBody] ProjectDTO data)
+        {
+            await _projectService.ImportAsync(data);
+            return Ok();
+        }
+        [HttpPost("import/technologies")]
+        public async Task<IActionResult> ImportTechnology([FromBody] TechnologyDTO data)
+        {
+            await _technologyService.ImportAsync(data);
+            return Ok();
+        }
         [HttpPut("projects/{id}")]
         public async Task<IActionResult> UpdateProject([FromBody] CreateProjectDTO createProjectDTO, [FromRoute] int id)
         {

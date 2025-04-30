@@ -3,6 +3,7 @@ import Todo from './views/Todo.vue';
 import Details from './views/Details.vue';
 import AddNew from './views/Add-new.vue';
 import Statistics from './views/Statistics.vue';
+import Data from './views/Data.vue';
 
 
 const routes: Array<RouteRecordRaw> = 
@@ -10,7 +11,8 @@ const routes: Array<RouteRecordRaw> =
   {path: "/", component: Todo },
   {path: "/details", component: Details},
   {path: "/add-new", component: AddNew},
-  {path: "/statistics", component: Statistics} 
+  {path: "/statistics", component: Statistics},
+  {path: "/data", component: Data} 
 ]
 
 const router = createRouter({

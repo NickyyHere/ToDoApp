@@ -1,5 +1,6 @@
 export type TaskDTO = {
     id: number
+    projectId: number
     projectName: string 
     name: string 
     description: string

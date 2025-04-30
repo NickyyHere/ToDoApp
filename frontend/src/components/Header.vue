@@ -8,7 +8,7 @@ import { redirect } from '../functions/utils';
         <div class="select-none separator">|</div>
         <div class="link" @click="redirect('/statistics')"><i class="fa-solid fa-chart-simple"></i> Statistics</div>
         <div class="select-none separator">|</div>
-        <div class="link"><i class="fa-solid fa-database"></i> Data</div>
+        <div class="link" @click="redirect('/data')"><i class="fa-solid fa-database"></i> Data</div>
     </div>
 </template>
 <style lang="css" scoped>

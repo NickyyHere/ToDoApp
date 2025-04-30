@@ -10,5 +10,6 @@ namespace ToDoApp.services.interfaces
             Task UpdateProjectAsync(CreateProjectDTO createProjectDTO, int id);
             Task DeleteProjectAsync(int id);
             Task ChangeProjectStatusAsync(int id);
+            Task ImportAsync(ProjectDTO dto);
     }
 }

@@ -7,5 +7,6 @@ namespace ToDoApp.services.interfaces
     {
         Task AddTechnologyAsync(CreateTechnologyDTO createTechnologyDTO);
         Task<List<TechnologyDTO>> GetTechnologiesAsync();
+        Task ImportAsync(TechnologyDTO dto);
     }
 }

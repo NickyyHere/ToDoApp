@@ -9,5 +9,6 @@ namespace ToDoApp.repository.interfaces
         Task AddAsync(TodoItem item);
         Task UpdateAsync(int id, TodoItem item);
         Task DeleteAsync(int id);
+        Task ChangeStatusAsync(int id);
     }
 }
