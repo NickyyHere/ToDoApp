@@ -68,7 +68,11 @@ namespace ToDoApp.repository
                 throw new ItemAlreadyFinishedException($"Task: {item.Name} is already finished");
             }
             item.Status++;
-            if(item.Status == Status.FINISHED) {
+            if(item.Status == Status.PROGRESS)
+            {
+                item.StartDate = DateTime.Now;
+            }
+            else if(item.Status == Status.FINISHED) {
                 item.FinishDate = DateTime.Now;
             }
             await _context.SaveChangesAsync();

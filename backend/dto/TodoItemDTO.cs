@@ -11,11 +11,11 @@ namespace ToDoApp.dto
         public string Name { get; set; }
         public string Description { get; set; }
         public Status Status { get; set; }
-        public DateTime StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
         public DateTime? FinishDate { get; set; }
         public List<string> Technologies { get; set; }
 
-        public TodoItemDTO(int id, int projectId, string projectName, string name, string description, Status status, List<string> technologies, DateTime startDate, DateTime? finishDate = null) {
+        public TodoItemDTO(int id, int projectId, string projectName, string name, string description, Status status, List<string> technologies, DateTime? startDate, DateTime? finishDate = null) {
             Id = id;
             ProjectId = projectId;
             ProjectName = projectName;

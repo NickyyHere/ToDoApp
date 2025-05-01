@@ -4,6 +4,7 @@ import type { TaskDTO, ProjectDTO } from '../types/ItemData';
     const props = defineProps<{
         itemData: TaskDTO | ProjectDTO
     }>()
+    const startDate = props.itemData.startDate == null ? "NEW" : new Date(props.itemData.startDate).toLocaleDateString()
     const finishDate = props.itemData.finishDate == null ? "ONGOING" : new Date(props.itemData.finishDate).toLocaleDateString()
 </script>
 <template>
@@ -13,7 +14,7 @@ import type { TaskDTO, ProjectDTO } from '../types/ItemData';
             <p class="text-center" v-if="isTaskData(itemData)">{{ itemData.projectName }}</p>
             <hr class="margin m-xs">
             <p class="font-sm">{{ itemData.description }}</p>
-            <p class="text-center">{{ new Date(props.itemData.startDate).toLocaleDateString() }} - {{ finishDate }}</p>
+            <p class="text-center">{{ startDate }} - {{ finishDate }}</p>
         </div>
     </div>
 </template>

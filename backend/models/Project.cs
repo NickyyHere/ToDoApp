@@ -16,7 +16,7 @@ namespace ToDoApp.models
         public string Description { get; set; }
 
         [Column("StartDate", TypeName ="timestamp")]
-        public DateTime StartDate { get; set;}
+        public DateTime? StartDate { get; set;}
         [Column("FinishDate", TypeName = "timestamp")]
         public DateTime? FinishDate { get; set;}
 
@@ -26,14 +26,11 @@ namespace ToDoApp.models
         public Project(string name, string description) {
             Name = name;
             Description = description;
-            StartDate = DateTime.Now;
-            FinishDate = null;
             Status = Status.NEW;
         }
 
         public Project() {
             Name = Description = string.Empty;
-            StartDate = DateTime.Now;
             Status = Status.NEW;
         }
     }

@@ -5,7 +5,7 @@ export type TaskDTO = {
     name: string 
     description: string
     status: number 
-    startDate: string 
+    startDate: string | null
     finishDate: string | null 
     technologies: string[]
 }
@@ -13,7 +13,7 @@ export type ProjectDTO = {
     id: number 
     name: string 
     description: string 
-    startDate: string
+    startDate: string | null
     finishDate: string | null 
     status: number
 }

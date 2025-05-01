@@ -1,7 +1,5 @@
 import router from "../router";
-import type { CreateProjectDTO, CreateTaskDTO, CreateTechnologyDTO, ProjectDTO, TaskDTO, TechnologyDTO } from "../types/ItemData";
-import { Type } from "../types/types";
-
+import type { ProjectDTO, TaskDTO, TechnologyDTO } from "../types/ItemData";
 export async function filterDataByStatus(data: TaskDTO[] | ProjectDTO[], status: number) : Promise<TaskDTO[] | ProjectDTO[]>{
     return data.filter(item => item.status == status)
 }

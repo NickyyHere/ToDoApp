@@ -45,13 +45,17 @@ namespace ToDoApp.services
         public async Task ChangeProjectStatusAsync(int id)
         {
             var project = await _projectRepository.GetByIdAsync(id);
-            if ((int)project.Status++ > 2)
-            {
-                project.Status = Status.FINISHED;
-                throw new ItemAlreadyFinishedException($"Project: {project.Name} is already finished");
+            if(project.Status >= Status.FINISHED) {
+                throw new ItemAlreadyFinishedException($"Task: {project.Name} is already finished");
             }
-            if((int)project.Status == (int)Status.FINISHED)
+            project.Status++;
+            if(project.Status == Status.PROGRESS)
+            {
+                project.StartDate = DateTime.Now;
+            }
+            else if(project.Status == Status.FINISHED) {
                 project.FinishDate = DateTime.Now;
+            }
             await _projectRepository.UpdateAsync(id, project);
         }
         public async Task<List<ProjectDTO>> GetProjectsAsync()

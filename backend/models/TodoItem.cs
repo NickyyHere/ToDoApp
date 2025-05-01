@@ -18,7 +18,7 @@ namespace ToDoApp.models
         [Column("Status", TypeName = "varchar(20)")]
         public Status Status { get; set; }
         [Column("StartDate", TypeName = "timestamp")]
-        public DateTime StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
         [Column("FinishDate", TypeName = "timestamp")]
         public DateTime? FinishDate { get; set; }
         public ICollection<TodoTechnology> Technologies{ get; set; } = new List<TodoTechnology>();
@@ -27,7 +27,6 @@ namespace ToDoApp.models
             Name = name;
             Description = description;
             Status = Status.NEW;
-            StartDate = DateTime.Now;
             Technologies = technologies;
             Project = project;
         }
@@ -35,7 +34,6 @@ namespace ToDoApp.models
         public TodoItem() {
             Name = Description = string.Empty;
             Status = Status.NEW;
-            StartDate = DateTime.Now;
             Project = new Project();
         }
     }
