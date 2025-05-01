@@ -52,29 +52,7 @@ namespace ToDoApp.repository
                     .ThenInclude(tt => tt.Technology)
                 .FirstOrDefaultAsync(t => t.Id == id)
                 ?? throw new ItemNotFoundException($"Task with id: {id} doesn't exist");
-            _context.TodoTechnologies.RemoveRange(_context.TodoTechnologies.Where(t => t.Item == item).ToList());
-
             _context.Entry(item).CurrentValues.SetValues(newItem);
-            await _context.SaveChangesAsync();
-        }
-        public async Task ChangeStatusAsync(int id)
-        {
-            var item = await _context.TodoItems
-                .Include(t => t.Technologies)
-                    .ThenInclude(tt => tt.Technology)
-                .FirstOrDefaultAsync(t => t.Id == id)
-                ?? throw new ItemNotFoundException($"Task with id: {id} doesn't exist");
-            if(item.Status >= Status.FINISHED) {
-                throw new ItemAlreadyFinishedException($"Task: {item.Name} is already finished");
-            }
-            item.Status++;
-            if(item.Status == Status.PROGRESS)
-            {
-                item.StartDate = DateTime.Now;
-            }
-            else if(item.Status == Status.FINISHED) {
-                item.FinishDate = DateTime.Now;
-            }
             await _context.SaveChangesAsync();
         }
     }

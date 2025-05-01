@@ -1,6 +1,7 @@
 using ToDoApp.dto;
 using ToDoApp.dto.create;
 using ToDoApp.enumerable;
+using ToDoApp.exception;
 using ToDoApp.factory;
 using ToDoApp.mapper;
 using ToDoApp.models;
@@ -52,7 +53,19 @@ namespace ToDoApp.services
         }
         public async Task ChangeTaskStatusAsync(int id)
         {
-            await _todoRepository.ChangeStatusAsync(id);
+            var item = await _todoRepository.GetByIdAsync(id);
+            if(item.Status >= Status.FINISHED) {
+                throw new ItemAlreadyFinishedException($"Task: {item.Name} is already finished");
+            }
+            item.Status++;
+            if(item.Status == Status.PROGRESS)
+            {
+                item.StartDate = DateTime.Now;
+            }
+            else if(item.Status == Status.FINISHED) {
+                item.FinishDate = DateTime.Now;
+            }
+            await _todoRepository.UpdateAsync(id, item);
         }
 
         public async Task ImportAsync(TodoItemDTO dto)
