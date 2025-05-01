@@ -29,8 +29,7 @@ namespace ToDoApp.services
 
         public async Task ImportAsync(TechnologyDTO dto)
         {
-            Technology technology = _technologyFactory.Build(dto);
-            await _technologyRepository.AddAsync(technology);
+            await _technologyRepository.AddAsync(_technologyFactory.Build(dto));
         }
     }
 }

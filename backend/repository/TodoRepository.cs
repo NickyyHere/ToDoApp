@@ -3,6 +3,7 @@ using ToDoApp.models;
 using ToDoApp.repository.dbcontext;
 using ToDoApp.repository.interfaces;
 using ToDoApp.enumerable;
+using ToDoApp.exception;
 
 namespace ToDoApp.repository
 {
@@ -21,12 +22,9 @@ namespace ToDoApp.repository
 
         public async Task DeleteAsync(int id)
         {
-            var item = await _context.TodoItems.FindAsync(id);
-            if(item != null) 
-            {
-                _context.TodoItems.Remove(item);
-                await _context.SaveChangesAsync();
-            }
+            var item = await _context.TodoItems.FindAsync(id) ?? throw new ItemNotFoundException($"Task with id: {id} doesn't exist");
+            _context.TodoItems.Remove(item);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<TodoItem>> GetAllAsync()
@@ -38,12 +36,13 @@ namespace ToDoApp.repository
                 .ToListAsync();
         }
 
-        public async Task<TodoItem?> GetByIdAsync(int id)
+        public async Task<TodoItem> GetByIdAsync(int id)
         {
             return await _context.TodoItems
                 .Include(t => t.Technologies)
                     .ThenInclude(tt => tt.Technology)
-                .FirstOrDefaultAsync(t => t.Id == id);
+                .FirstOrDefaultAsync(t => t.Id == id)
+                ?? throw new ItemNotFoundException($"Task with id: {id} doesn't exist");
         }
 
         public async Task UpdateAsync(int id, TodoItem newItem)
@@ -51,30 +50,26 @@ namespace ToDoApp.repository
             var item = await _context.TodoItems
                 .Include(t => t.Technologies)
                     .ThenInclude(tt => tt.Technology)
-                .FirstOrDefaultAsync(t => t.Id == id);
-            if(item != null)
-            {
-                _context.TodoTechnologies.RemoveRange(_context.TodoTechnologies.Where(t => t.Item == item).ToList());
+                .FirstOrDefaultAsync(t => t.Id == id)
+                ?? throw new ItemNotFoundException($"Task with id: {id} doesn't exist");
+            _context.TodoTechnologies.RemoveRange(_context.TodoTechnologies.Where(t => t.Item == item).ToList());
 
-                _context.Entry(item).CurrentValues.SetValues(newItem);
-                await _context.SaveChangesAsync();
-            }
+            _context.Entry(item).CurrentValues.SetValues(newItem);
+            await _context.SaveChangesAsync();
         }
         public async Task ChangeStatusAsync(int id)
         {
             var item = await _context.TodoItems
                 .Include(t => t.Technologies)
                     .ThenInclude(tt => tt.Technology)
-                .FirstOrDefaultAsync(t => t.Id == id);
-            if(item != null)
-            {
-                if(item.Status >= Status.FINISHED) {
-                    throw new Exception("Task already finished");
-                }
-                item.Status++;
-                if(item.Status == Status.FINISHED) {
-                    item.FinishDate = DateTime.Now;
-                }
+                .FirstOrDefaultAsync(t => t.Id == id)
+                ?? throw new ItemNotFoundException($"Task with id: {id} doesn't exist");
+            if(item.Status >= Status.FINISHED) {
+                throw new ItemAlreadyFinishedException($"Item: {item.Name} is already finished");
+            }
+            item.Status++;
+            if(item.Status == Status.FINISHED) {
+                item.FinishDate = DateTime.Now;
             }
             await _context.SaveChangesAsync();
         }

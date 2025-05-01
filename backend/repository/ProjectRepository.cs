@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ToDoApp.exception;
 using ToDoApp.models;
 using ToDoApp.repository.dbcontext;
 using ToDoApp.repository.interfaces;
@@ -21,12 +22,9 @@ namespace ToDoApp.repository
 
         public async Task DeleteAsync(int id)
         {
-            var project = await _context.Projects.FindAsync(id);
-            if(project != null)
-            {
-                _context.Projects.Remove(project);
-                await _context.SaveChangesAsync();
-            }
+            var project = await _context.Projects.FindAsync(id) ?? throw new ItemNotFoundException($"Project with id: {id} doesn't exist");
+            _context.Projects.Remove(project);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<Project>> GetAllAsync()
@@ -34,24 +32,21 @@ namespace ToDoApp.repository
             return await _context.Projects.ToListAsync();
         }
 
-        public async Task<Project?> GetByIdAsync(int id)
+        public async Task<Project> GetByIdAsync(int id)
         {
-            return await _context.Projects.FindAsync(id);
+            return await _context.Projects.FindAsync(id) ?? throw new ItemNotFoundException($"Project with id: {id} doesn't exist");
         }
 
         public async Task UpdateAsync(int id, Project newProject)
         {
-            var item = await _context.Projects.FindAsync(id);
-            if(item != null)
-            {
-                _context.Entry(item).CurrentValues.SetValues(newProject);
-                await _context.SaveChangesAsync();
-            }
+            var item = await _context.Projects.FindAsync(id) ?? throw new ItemNotFoundException($"Project with id: {id} doesn't exist");;
+            _context.Entry(item).CurrentValues.SetValues(newProject);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task<Project?> GetByNameAsync(string name)
+        public async Task<Project> GetByNameAsync(string name)
         {
-            return await _context.Projects.FirstOrDefaultAsync(p => p.Name == name);
+            return await _context.Projects.FirstOrDefaultAsync(p => p.Name == name) ?? throw new ItemNotFoundException($"Project with name: {name} doesn't exist");
         }
     }
 }

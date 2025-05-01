@@ -35,12 +35,12 @@ namespace ToDoApp.services
         }
         public async Task UpdateTaskAsync(CreateTodoItemDTO createTodoItemDTO, int id)
         {
-            TodoItem? todoItem = await _todoRepository.GetByIdAsync(id) ?? throw new Exception("Task does not exist");
+            var todoItem = await _todoRepository.GetByIdAsync(id);
+            var technologies = await _technologyRepository.GetByNamesAsync(createTodoItemDTO.TechnologyNames);
             if (todoItem.Project.Id != createTodoItemDTO.ProjectId) {
-                var project = await _projectRepository.GetByIdAsync(createTodoItemDTO.ProjectId) ?? throw new Exception("Couldn't find project");
+                var project = await _projectRepository.GetByIdAsync(createTodoItemDTO.ProjectId);
                 todoItem.Project = project;
             }
-            var technologies = await _technologyRepository.GetByNamesAsync(createTodoItemDTO.TechnologyNames);
             todoItem.Name = createTodoItemDTO.Name;
             todoItem.Description = createTodoItemDTO.Description;
             todoItem.Technologies = technologies.Select(t => new TodoTechnology{Technology = t}).ToList();
@@ -57,8 +57,7 @@ namespace ToDoApp.services
 
         public async Task ImportAsync(TodoItemDTO dto)
         {
-            TodoItem task = await _taskFactory.BuildAsync(dto);
-            await _todoRepository.AddAsync(task);
+            await _todoRepository.AddAsync(await _taskFactory.BuildAsync(dto));
         }
     }
 }

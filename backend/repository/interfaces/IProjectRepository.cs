@@ -5,8 +5,8 @@ namespace ToDoApp.repository.interfaces
     public interface IProjectRepository
     {
         Task<List<Project>> GetAllAsync();
-        Task<Project?> GetByIdAsync(int id);
-        Task<Project?> GetByNameAsync(string name);
+        Task<Project> GetByIdAsync(int id);
+        Task<Project> GetByNameAsync(string name);
         Task AddAsync(Project project);
         Task UpdateAsync(int id, Project project);
         Task DeleteAsync(int id);

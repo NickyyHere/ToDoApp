@@ -2,6 +2,7 @@ using System.Reflection.Metadata.Ecma335;
 using Microsoft.AspNetCore.Mvc;
 using ToDoApp.dto;
 using ToDoApp.dto.create;
+using ToDoApp.exception;
 using ToDoApp.services.interfaces;
 using ToDoApp.services.interfaces.ITodoService;
 
@@ -77,13 +78,27 @@ namespace ToDoApp.controllers
         [HttpPut("projects/{id}")]
         public async Task<IActionResult> UpdateProject([FromBody] CreateProjectDTO createProjectDTO, [FromRoute] int id)
         {
-            await _projectService.UpdateProjectAsync(createProjectDTO, id);
+            try
+            {
+                await _projectService.UpdateProjectAsync(createProjectDTO, id);
+            }
+            catch(ItemNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
             return Ok();
         }
         [HttpPut("tasks/{id}")]
         public async Task<IActionResult> UpdateTask([FromBody] CreateTodoItemDTO createTodoItemDTO, [FromRoute] int id)
         {
-            await _todoService.UpdateTaskAsync(createTodoItemDTO, id);
+            try
+            {
+                await _todoService.UpdateTaskAsync(createTodoItemDTO, id);
+            }
+            catch(ItemNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
             return Ok();
         }
         [HttpDelete("tasks/{id}")]
@@ -95,19 +110,48 @@ namespace ToDoApp.controllers
         [HttpDelete("projects/{id}")]
         public async Task<IActionResult> DeleteProject([FromRoute] int id)
         {
-            await _projectService.DeleteProjectAsync(id);
+            try
+            {
+                await _projectService.DeleteProjectAsync(id);
+            }
+            catch(ItemNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
             return Ok();
         }
         [HttpPut("projects/status/{id}")]
         public async Task<IActionResult> ChangeProjectStatus([FromRoute] int id)
         {
-            await _projectService.ChangeProjectStatusAsync(id);
+            try
+            {
+                await _projectService.ChangeProjectStatusAsync(id);
+            }
+            catch(ItemNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch(ItemAlreadyFinishedException e)
+            {
+                return BadRequest(e.Message);
+            }
             return Ok();
         }
         [HttpPut("tasks/status/{id}")]
         public async Task<IActionResult> ChangeTaskStatus([FromRoute] int id)
         {
-            await _todoService.ChangeTaskStatusAsync(id);
+            try
+            {
+                await _todoService.ChangeTaskStatusAsync(id);
+            }
+            catch(ItemNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch(ItemAlreadyFinishedException e)
+            {
+                return BadRequest(e.Message);
+            }
             return Ok();
         }
     }

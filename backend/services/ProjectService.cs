@@ -1,6 +1,7 @@
 using ToDoApp.dto;
 using ToDoApp.dto.create;
 using ToDoApp.enumerable;
+using ToDoApp.exception;
 using ToDoApp.factory;
 using ToDoApp.mapper;
 using ToDoApp.models;
@@ -26,15 +27,15 @@ namespace ToDoApp.services
         }
         public async Task UpdateProjectAsync(CreateProjectDTO createProjectDTO, int id)
         {
-            Project? project = await _projectRepository.GetByIdAsync(id) ?? throw new Exception("Project does not exist");
+            var project = await _projectRepository.GetByIdAsync(id);
             project.Name = createProjectDTO.Name;
             project.Description = createProjectDTO.Description;
             await _projectRepository.UpdateAsync(id, project);
         }
         public async Task DeleteProjectAsync(int id)
         {
-            var project = await _projectRepository.GetByIdAsync(id) ?? throw new Exception("Project does not exist");
-            List<TodoItem> projectTasks = await GetProjectTasksAsync(project);
+            var project = await _projectRepository.GetByIdAsync(id);
+            var projectTasks = await GetProjectTasksAsync(project);
             foreach(TodoItem task in projectTasks)
             {
                 await _todoRepository.DeleteAsync(task.Id);
@@ -43,11 +44,11 @@ namespace ToDoApp.services
         }
         public async Task ChangeProjectStatusAsync(int id)
         {
-            var project = await _projectRepository.GetByIdAsync(id) ?? throw new Exception("Project does not exist");
+            var project = await _projectRepository.GetByIdAsync(id);
             if ((int)project.Status++ > 2)
             {
                 project.Status = Status.FINISHED;
-                throw new Exception("Project is already of finished status");
+                throw new ItemAlreadyFinishedException($"Project: {project.Name} is already finished");
             }
             if((int)project.Status == (int)Status.FINISHED)
                 project.FinishDate = DateTime.Now;
@@ -60,7 +61,7 @@ namespace ToDoApp.services
         }
         private async Task<List<TodoItem>> GetProjectTasksAsync(Project project)
         {
-            List<TodoItem> tasks = await _todoRepository.GetAllAsync();
+            var tasks = await _todoRepository.GetAllAsync();
             List<TodoItem> projectTasks = new();
             foreach(TodoItem item in tasks)
             {
@@ -74,8 +75,7 @@ namespace ToDoApp.services
 
         public async Task ImportAsync(ProjectDTO dto)
         {
-            Project project = _projectFactory.Build(dto);
-            await _projectRepository.AddAsync(project);
+            await _projectRepository.AddAsync(_projectFactory.Build(dto));
         }
     }
 }

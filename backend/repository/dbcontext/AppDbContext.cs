@@ -19,10 +19,6 @@ namespace ToDoApp.repository.dbcontext
                 .HasIndex(p => p.Name)
                 .IsUnique();
 
-            modelBuilder.Entity<TodoItem>()
-                .HasIndex(t => t.Name)
-                .IsUnique();
-
             modelBuilder.Entity<Technology>()
                 .HasIndex(t => t.Name)
                 .IsUnique();
