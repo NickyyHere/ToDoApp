@@ -65,7 +65,7 @@ namespace ToDoApp.repository
                 .FirstOrDefaultAsync(t => t.Id == id)
                 ?? throw new ItemNotFoundException($"Task with id: {id} doesn't exist");
             if(item.Status >= Status.FINISHED) {
-                throw new ItemAlreadyFinishedException($"Item: {item.Name} is already finished");
+                throw new ItemAlreadyFinishedException($"Task: {item.Name} is already finished");
             }
             item.Status++;
             if(item.Status == Status.FINISHED) {
