@@ -15,7 +15,6 @@ const id = parseInt(route.params.id as string)
 const data = ref<TaskDTO | ProjectDTO>({} as TaskDTO)
 
 const isEditing = ref<boolean>(false)
-const checkedTechnologies = ref<string[]>([])
 
 const projects =  ref<ProjectDTO[]>([])
 const technologies = ref<TechnologyDTO[]>([])
@@ -97,7 +96,9 @@ const handleUpdate = async() => {
     const onError = () => {
         emitter.emit("showNotification", {messageType: MessageType.error, message: "Failed updating item"})
     }
-    formData.value.technologyNames = checkedTechnologies.value
+    const checkboxes_wrapper = document.querySelector('.checkbox')?.closest('div')?.parentElement
+    const checkboxes = checkboxes_wrapper?.querySelectorAll('input[type="checkbox"]:checked') || []
+    formData.value.technologyNames = Array.from(checkboxes).map(cb => (cb as HTMLInputElement).getAttribute('value') || '')
     status = await sendForm(Action.update, type, formData.value, data.value?.id)
     processResponseStatus(status, onSuccess, onError, onMissing)
 }
@@ -123,7 +124,7 @@ onMounted(async () => {
         <div class="cover-item absolute-center bg-primary border border-thicker padding p-lg flex justify-center direction-col text-center">
             <h3>CONFIRM DELETING ITEM</h3>
             <hr>
-            <h3>Type name and id of item to delete</h3>
+            <h3>Enter name and id of item to delete</h3>
             <p class="text-color-error font-xl" v-if="confirmationResult">{{ confirmationResult }}</p>
             <div>
                 <input type="text" :placeholder="'NAME#ID'" class="font-xxl padding p-xs" v-model="confimation">
@@ -136,7 +137,7 @@ onMounted(async () => {
         <!-- If editing: header -->
         <div v-if="isEditing">
             <h2>
-                {{ isTaskData(data) ? "TASK" : "PROJECT" }} #{{ data.id }}
+                {{ type == Type.task ? "TASK" : "PROJECT" }} #{{ data.id }}
             </h2>
         </div>
         <form @submit.prevent="handleUpdate">
@@ -150,22 +151,18 @@ onMounted(async () => {
             <!-- If viewing details, show Name#Id -->
             <div v-else>
                 <h2>{{ data.name }}<span class="absolute text-color-muted">#{{ data.id }}</span></h2>
+                <p v-if="type == Type.task" class="font-xl">{{ (data as TaskDTO).projectName }}</p>
+                <span class="margin-top m-xs block"></span>
+                <hr class="width-50 block margin-left margin-right m-auto">
             </div>
             <!-- If editing, and viewed item is a task, select for project THE VALUE IS A STRING FFS WHY AM I RETARDED -->
             <div v-if="isEditing">
-                <div v-if="isTaskData(data)">
+                <div v-if="type == Type.task">
                     <label for="projectName" class="font-xxl">PROJECT</label><br>
                     <select name="projectName" class="padding p-xs font-xl text-center" v-model="formData.projectId" required>
                         <option v-for="project in projects" :value="project.id">{{ project.name }}</option>
                     </select>
                 </div>
-            </div>
-            <!-- If viewing details for a task, show project name -->
-            <div v-else>
-                <p v-if="isTaskData(data)" class="font-xl">{{ data.projectName }}</p>
-            </div>
-            <!-- If editing, textarea for description -->
-            <div v-if="isEditing">
                 <div>
                     <label for="description" class="font-xxl">DESCRIPTION</label><br>
                     <textarea name="description" class="padding p-xs font-xl" v-model="formData.description"></textarea>
@@ -173,28 +170,35 @@ onMounted(async () => {
             </div>
             <!-- If viewing details, show description -->
             <div v-else class="margin-top m-md">
-                <hr>
-                <h3>DESCRIPTION</h3>
+                <p class="font-xxl text-bold">DESCRIPTION</p>
                 <p class="text-justify padding p-lg width-40 margin-left margin-right m-auto">{{ data.description }}</p>
-                <hr>
+                <hr class="width-50 block margin-left margin-right m-auto">
             </div>
             <!-- If editing task, checkboxes for technologies -->
             <div v-if="isEditing">
-                <div v-if="isTaskData(data)">
+                <div v-if="type == Type.task">
                     <p class="font-xxl">TECHNOLOGIES</p>
-                    <div v-if="isTaskData(data)" class="flex justify-center margin-top m-xs select-none gap-sm wrap">
-                        <div v-for="technology in technologies" >
-                            <label :for="technology.name" class="border rounded padding p-xs font-xl checkbox" @click="labelAsCheckbox($event.target as HTMLElement, checkedTechnologies)">{{ technology.name }}</label>
-                            <input type="checkbox" :value="technology.name" :name="technology.name" class="hidden">
+                    <div v-if="type == Type.task" class="flex justify-center margin-top m-xs select-none gap-sm wrap">
+                        <div v-for="technology in technologies">
+                            <label 
+                                :for="technology.name"
+                                class="border rounded padding p-xs font-xl checkbox"
+                                :class="(data as TaskDTO).technologies.includes(technology.name) ? 'checked' : ''" 
+                                @click="labelAsCheckbox($event.target as HTMLElement)"
+                            >{{ technology.name }}</label>
+                            <input type="checkbox" :value="technology.name" :name="technology.name" class="hidden" :checked="(data as TaskDTO).technologies.includes(technology.name)">
                         </div>
                     </div>
                 </div>
             </div>
             <!-- If viewing details show technologies -->
-            <div v-else>
-                <div v-if="isTaskData(data)" class="flex justify-center margin-top m-md gap-sm wrap">
-                    <div v-for="technology in data.technologies" class="border rounded padding p-xs font-xl">{{ technology }}</div>
+            <div v-else-if="type == Type.task" class="flex justify-center margin-top m-md direction-col">
+                <p class="font-xxl text-bold margin-bottom m-sm">TECHNOLOGIES</p>
+                <div class="flex justify-center direction-row gap-md width-50 margin-left margin-right m-auto">
+                    <div v-for="technology in (data as TaskDTO).technologies" class="border rounded padding p-xs font-xl">{{ technology }}</div>
                 </div>
+                <span class="margin-top m-md block"></span>
+                <hr class="width-50 block margin-left margin-right m-auto">
             </div>
             <!-- Buttons if editing -->
             <div v-if="isEditing" class="margin-top m-xl flex justify-center gap-sm">
@@ -203,6 +207,7 @@ onMounted(async () => {
             </div>
             <!-- If not editing -->
             <div v-else >
+                <p class="font-xxl text-bold margin-bottom margin-top m-sm">STATUS<span v-if="data.startDate" class="font-xxl text-bold"> AND DATE</span></p>
                 <!-- Item status -->
                 <p class="margin-top m-md font-xl">{{ statusToText(data.status) }}
                     <!-- Button to change status -->

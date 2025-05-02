@@ -6,6 +6,7 @@
   --accent-color: #34D399;
   --text-color: #F8FAFC;
   --border-color: #334155;
+  --bg-button: #111e3d;
 
   --error: rgb(189, 11, 11);
 
@@ -476,7 +477,8 @@ select, input, textarea {
 button {
   cursor: pointer;
   border: 2px solid var(--border-color);
-  background-color: var(--surface-color);
+  border-radius: 10px;
+  background-color: var(--bg-button);
   color: var(--text-color);
   transition: .3s;
 }

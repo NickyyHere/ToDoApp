@@ -8,7 +8,6 @@ import { sendForm } from '../functions/form_utils'
 import emitter from '../types/emitter'
 
 const itemType = ref<Type.task | Type.project | Type.technology>(Type.task)
-const checkedTechnologies = ref<string[]>([])
 
 const projects = ref<ProjectDTO[]>([])
 const technologies = ref<TechnologyDTO[]>([])
@@ -23,7 +22,6 @@ const formData = ref({
 const handleChangeType = () => {
     const form = document.querySelector('form') as HTMLFormElement
     form.reset()
-    checkedTechnologies.value = []
     formData.value.name = ''
     formData.value.description = ''
     formData.value.projectId = -1
@@ -41,7 +39,9 @@ const handleAdd = async () => {
     const onMissing = () => {
         emitter.emit("showNotification", {messageType: MessageType.error, message: "Couldn't find server resource"})
     }
-    formData.value.technologyNames = checkedTechnologies.value
+    const checkboxes_wrapper = document.querySelector('.checkbox')?.closest('div')?.parentElement
+    const checkboxes = checkboxes_wrapper?.querySelectorAll('input[type="checkbox"]:checked') || []
+    formData.value.technologyNames = Array.from(checkboxes).map(cb => (cb as HTMLInputElement).getAttribute('value') || '')
     status = await sendForm(Action.add, itemType.value, formData.value)
     processResponseStatus(status, onSuccess, onError, onMissing)
 }
@@ -89,7 +89,7 @@ onMounted(async () => {
                 <p for="project" class="text-center block font-xxl margin-top m-md margin-bottom">TECHNOLOGIES</p>
                 <div class="flex justify-center align-start wrap gap-md">
                     <div v-for="technology in technologies">
-                        <label :for="technology.name" class="checkbox font-xxl padding p-xs" @click="labelAsCheckbox($event.target as HTMLElement, checkedTechnologies)">{{ technology.name }}</label>
+                        <label :for="technology.name" class="checkbox font-xxl padding p-xs" @click="labelAsCheckbox($event.target as HTMLElement)">{{ technology.name }}</label>
                         <input type="checkbox" :name="technology.name" :value="technology.name" class="hidden">
                     </div>
                 </div>

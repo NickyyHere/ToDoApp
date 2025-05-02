@@ -39,6 +39,7 @@ namespace ToDoApp.repository
         public async Task<TodoItem> GetByIdAsync(int id)
         {
             return await _context.TodoItems
+                .Include(t => t.Project)
                 .Include(t => t.Technologies)
                     .ThenInclude(tt => tt.Technology)
                 .FirstOrDefaultAsync(t => t.Id == id)

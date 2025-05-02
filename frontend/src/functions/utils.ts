@@ -20,27 +20,10 @@ export function isTaskData(obj: any) : obj is TaskDTO {
     )
 }
 
-export function labelAsCheckbox(target: HTMLElement, checkedTechnologies: string[]) {
+export function labelAsCheckbox(target: HTMLElement) {
     const checkbox = target.closest('div')?.querySelector('input[type="checkbox"]') as HTMLInputElement
     checkbox.checked = !checkbox.checked
     target.classList.toggle('checked')
-    const technology: string = checkbox.name
-    let index: number | null = null
-    if(checkedTechnologies.length == 0) {
-        checkedTechnologies.push(technology)
-    } else {
-        for(let i = 0; i < checkedTechnologies.length; i++) {
-            if(checkedTechnologies[i] == technology) {
-                index = i
-                break
-            }
-        }
-        if(index == null) {
-            checkedTechnologies.push(technology)
-        } else {
-            checkedTechnologies.splice(index, 1)
-        }
-    }
 }
 
 export function statusToText(status: number) : string {
