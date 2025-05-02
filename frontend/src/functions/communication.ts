@@ -1,13 +1,14 @@
 import type { CreateProjectDTO, CreateTaskDTO, CreateTechnologyDTO, ProjectDTO, TaskDTO, TechnologyDTO } from "../types/ItemData";
 import axios from 'axios'
 import { Type } from "../types/types";
+import { processResponseError } from "./utils";
 
 async function fetchItems(type: Type) {
     try {
         const response = await axios.get(`http://localhost:5000/api/todo/${type}`)
         return response.data
-    } catch(error) {
-        console.error(`Error fetching data: ${error}`)
+    } catch(error: any) {
+        processResponseError(error.status, error.data)
         return []
     }
 }
@@ -16,8 +17,8 @@ async function fetchItem(type: Type, id: number) {
     try {
         const response = await axios.get(`http://localhost:5000/api/todo/${type}/${id}`)
         return response.data
-    } catch(error) {
-        console.error(`Error fetching data: ${error}`)
+    } catch(error: any) {
+        processResponseError(error.status, error.data)
         return []
     }
 }
@@ -32,8 +33,9 @@ async function addNewItem(type: Type, data: CreateTaskDTO | CreateProjectDTO | C
         }
     })
     return response.status as number
-    } catch(error) {
-        console.error(`Error adding new ${type}: ${error}`)
+    } catch(error: any) {
+        processResponseError(error.response.status, error.response.data)
+        return error.response.status
     }
 }
 
@@ -47,8 +49,9 @@ async function importItem(type: Type, data: TaskDTO | ProjectDTO | TechnologyDTO
         }
     })
     return response.status as number
-    } catch(error) {
-        return 400
+    } catch(error: any) {
+        processResponseError(error.response.status, error.response.data)
+        return error.response.status
     }
 }
 
@@ -62,8 +65,9 @@ async function updateItem(type: Type, data: CreateTaskDTO | CreateProjectDTO, id
         }
     })
     return response.status
-    } catch(error) {
-        console.error(`Error updating ${type}: ${error}`)
+    } catch(error: any) {
+        processResponseError(error.response.status, error.response.data)
+        return error.response.status
     }
 }
 
@@ -72,8 +76,9 @@ async function deleteItem(type: Type, id: number) {
         let url = `http://localhost:5000/api/todo/${type}/${id}`
         const response = await axios.delete(url)
         return response.status
-    } catch(error) {
-        console.error(`Error updating ${type}: ${error}`)
+    } catch(error: any) {
+        processResponseError(error.response.status, error.response.data)
+        return error.response.status
     }
 }
 
@@ -82,8 +87,9 @@ async function changeItemStatus(type: Type, id: number) {
         let url = `http://localhost:5000/api/todo/${type}/status/${id}`
         const response = await axios.put(url)
         return response.status
-    } catch(error) {
-        console.error(`Error updating ${type}: ${error}`)
+    } catch(error: any) {
+        processResponseError(error.response.status, error.response.data)
+        return error.response.status
     }
 }
 

@@ -7,13 +7,13 @@ defineProps<{
 }>()
 </script>
 <template>
-    <div class="absolute notification bg-surface padding p-md border border-thicker">
+    <div class="fixed notification bg-surface padding p-md border border-thicker">
         <p class="font-xxl" :class="type">{{ message }}</p>
     </div>
 </template>
 <style lang="css" scoped>
     .notification {
-        right: 0;
+        right: -3px;
         min-width: 10%;
         top: 10%;
         z-index: 5;

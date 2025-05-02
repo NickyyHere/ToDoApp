@@ -63,19 +63,40 @@ namespace ToDoApp.controllers
         [HttpPost("tasks")]
         public async Task<IActionResult> AddTask([FromBody] CreateTodoItemDTO data)
         {
-            await _todoService.AddTodoItemAsync(data);
-            return Ok();
+            try
+            {
+                await _todoService.AddTodoItemAsync(data);
+                return Ok();
+            }
+            catch(DuplicateEntityException e)
+            {
+                return Conflict(e.Message);
+            }
         }
         [HttpPost("projects")]
         public async Task<IActionResult> AddProject([FromBody] CreateProjectDTO createProjectDTO)
         {
-            await _projectService.AddProjectAsync(createProjectDTO);
+            try
+            {
+                await _projectService.AddProjectAsync(createProjectDTO);
+            }
+            catch(DuplicateEntityException e)
+            {
+                return Conflict(e.Message);
+            }
             return Ok();
         }
         [HttpPost("technologies")]
         public async Task<IActionResult> AddTechnology([FromBody] CreateTechnologyDTO createTechnologyDTO)
         {
-            await _technologyService.AddTechnologyAsync(createTechnologyDTO);
+            try
+            {
+                await _technologyService.AddTechnologyAsync(createTechnologyDTO);
+            }
+            catch(DuplicateEntityException e)
+            {
+                return Conflict(e.Message);
+            }
             return Ok();
         }
         [HttpPost("import/tasks")]

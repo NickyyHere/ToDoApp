@@ -9,7 +9,9 @@ namespace ToDoApp.models
     {
         [Key]
         public int Id { get; set; }
-        [Column("Project_id")]
+        [ForeignKey("Project")]
+        [Column("ProjectId")]
+        public int ProjectId { get; set; }
         public Project Project { get; set; }
         [Column("Name")]
         public string Name { get; set; }

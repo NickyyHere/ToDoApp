@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using ToDoApp.exception;
 using ToDoApp.models;
 using ToDoApp.repository.dbcontext;
@@ -16,13 +17,20 @@ namespace ToDoApp.repository
 
         public async Task AddAsync(Technology technology)
         {
-            _context.Technologies.Add(technology);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Technologies.Add(technology);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException e) when (e.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
+            {
+                throw new DuplicateEntityException($"Technology {technology.Name} already exists");
+            }
         }
 
         public async Task DeleteAsync(int id)
         {
-            var item = await _context.Technologies.FindAsync(id) ?? throw new ItemNotFoundException($"Technology with id: {id} doesn't exist");
+            var item = await _context.Technologies.FindAsync(id) ?? throw new ItemNotFoundException($"Technology with id {id} doesn't exist");
             _context.Technologies.Remove(item);
             await _context.SaveChangesAsync();
         }
@@ -34,12 +42,12 @@ namespace ToDoApp.repository
 
         public async Task<Technology> GetByIdAsync(int id)
         {
-            return await _context.Technologies.FindAsync(id) ?? throw new ItemNotFoundException($"Technology with id: {id} doesn't exist");
+            return await _context.Technologies.FindAsync(id) ?? throw new ItemNotFoundException($"Technology with id {id} doesn't exist");
         }
 
         public async Task UpdateAsync(int id, Technology newTechnology)
         {
-            var item = await _context.Technologies.FindAsync(id) ?? throw new ItemNotFoundException($"Technology with id: {id} doesn't exist");;
+            var item = await _context.Technologies.FindAsync(id) ?? throw new ItemNotFoundException($"Technology with id {id} doesn't exist");;
             _context.Entry(item).CurrentValues.SetValues(newTechnology);
             await _context.SaveChangesAsync();
         }

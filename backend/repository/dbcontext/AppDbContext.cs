@@ -23,6 +23,10 @@ namespace ToDoApp.repository.dbcontext
                 .HasIndex(t => t.Name)
                 .IsUnique();
 
+            modelBuilder.Entity<TodoItem>()
+                .HasIndex(t => new {t.ProjectId, t.Name})
+                .IsUnique();
+
             modelBuilder.Entity<TodoTechnology>()
                 .HasKey(it => new { it.ItemId, it.TechnologyId });
 

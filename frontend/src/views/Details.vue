@@ -28,10 +28,6 @@ const viewConfirmation = ref<boolean>(false)
 
 const blockStatusChange = ref<boolean>(false)
 
-const onMissing = () => {
-    emitter.emit("showNotification", {messageType: MessageType.error, message: "Coulnd't find resource"})
-}
-
 const formData = ref<{
     name: string
     description: string
@@ -50,9 +46,6 @@ const handleDelete = async () => {
         redirect("/")
         emitter.emit("showNotification", {messageType: MessageType.success, message: "Item deleted"})
     }
-    const onError = () => {
-        emitter.emit("showNotification", {messageType: MessageType.success, message: "Item deletion failed"})
-    }
     switch(type) {
         case Type.project:
             status = await deleteProject(id)
@@ -63,7 +56,7 @@ const handleDelete = async () => {
         default:
             status = 400
     }
-    processResponseStatus(status, onSuccess, onError, onMissing)
+    processResponseStatus(status, onSuccess)
 }
 const handleChangeStatus = async() => {
     let status: number
@@ -71,9 +64,6 @@ const handleChangeStatus = async() => {
         blockStatusChange.value = true
         data.value.status += 1
         emitter.emit("showNotification", {messageType: MessageType.success, message: "Item status changed"})
-    }
-    const onError = () => {
-        emitter.emit("showNotification", {messageType: MessageType.success, message: "Failed to change item status"})
     }
     switch(type) {
         case Type.project:
@@ -85,7 +75,7 @@ const handleChangeStatus = async() => {
         default:
             status = 400
     }
-    processResponseStatus(status, onSuccess, onError, onMissing)
+    processResponseStatus(status, onSuccess)
 }
 const handleUpdate = async() => {
     let status: number
@@ -93,14 +83,11 @@ const handleUpdate = async() => {
         redirect("/")
         emitter.emit("showNotification", {messageType: MessageType.success, message: "Item updated"})
     }
-    const onError = () => {
-        emitter.emit("showNotification", {messageType: MessageType.error, message: "Failed updating item"})
-    }
     const checkboxes_wrapper = document.querySelector('.checkbox')?.closest('div')?.parentElement
     const checkboxes = checkboxes_wrapper?.querySelectorAll('input[type="checkbox"]:checked') || []
     formData.value.technologyNames = Array.from(checkboxes).map(cb => (cb as HTMLInputElement).getAttribute('value') || '')
     status = await sendForm(Action.update, type, formData.value, data.value?.id)
-    processResponseStatus(status, onSuccess, onError, onMissing)
+    processResponseStatus(status, onSuccess)
 }
 
 onMounted(async () => {

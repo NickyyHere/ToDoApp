@@ -4,6 +4,7 @@ using ToDoApp.repository.dbcontext;
 using ToDoApp.repository.interfaces;
 using ToDoApp.enumerable;
 using ToDoApp.exception;
+using Npgsql;
 
 namespace ToDoApp.repository
 {
@@ -16,13 +17,20 @@ namespace ToDoApp.repository
         }
         public async Task AddAsync(TodoItem item)
         {
-            _context.TodoItems.Add(item);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.TodoItems.Add(item);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException e) when (e.InnerException is PostgresException pgEx && pgEx.SqlState == "23505")
+            {
+                throw new DuplicateEntityException($"Task {item.Name} already exists in project {item.Project.Name}");
+            }
         }
 
         public async Task DeleteAsync(int id)
         {
-            var item = await _context.TodoItems.FindAsync(id) ?? throw new ItemNotFoundException($"Task with id: {id} doesn't exist");
+            var item = await _context.TodoItems.FindAsync(id) ?? throw new ItemNotFoundException($"Task with id {id} doesn't exist");
             _context.TodoItems.Remove(item);
             await _context.SaveChangesAsync();
         }
@@ -43,7 +51,7 @@ namespace ToDoApp.repository
                 .Include(t => t.Technologies)
                     .ThenInclude(tt => tt.Technology)
                 .FirstOrDefaultAsync(t => t.Id == id)
-                ?? throw new ItemNotFoundException($"Task with id: {id} doesn't exist");
+                ?? throw new ItemNotFoundException($"Task with id {id} doesn't exist");
         }
 
         public async Task UpdateAsync(int id, TodoItem newItem)
@@ -52,7 +60,7 @@ namespace ToDoApp.repository
                 .Include(t => t.Technologies)
                     .ThenInclude(tt => tt.Technology)
                 .FirstOrDefaultAsync(t => t.Id == id)
-                ?? throw new ItemNotFoundException($"Task with id: {id} doesn't exist");
+                ?? throw new ItemNotFoundException($"Task with id {id} doesn't exist");
             _context.Entry(item).CurrentValues.SetValues(newItem);
             await _context.SaveChangesAsync();
         }

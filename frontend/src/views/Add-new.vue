@@ -33,17 +33,11 @@ const handleAdd = async () => {
         redirect("/")
         emitter.emit("showNotification", {messageType: MessageType.success, message: "Successfuly added new item"})
     }
-    const onError = () => {
-        emitter.emit("showNotification", {messageType: MessageType.error, message: "Adding new item failed"})
-    }
-    const onMissing = () => {
-        emitter.emit("showNotification", {messageType: MessageType.error, message: "Couldn't find server resource"})
-    }
     const checkboxes_wrapper = document.querySelector('.checkbox')?.closest('div')?.parentElement
     const checkboxes = checkboxes_wrapper?.querySelectorAll('input[type="checkbox"]:checked') || []
     formData.value.technologyNames = Array.from(checkboxes).map(cb => (cb as HTMLInputElement).getAttribute('value') || '')
     status = await sendForm(Action.add, itemType.value, formData.value)
-    processResponseStatus(status, onSuccess, onError, onMissing)
+    processResponseStatus(status, onSuccess)
 }
 onMounted(async () => {
     projects.value = await fetchProjects()
@@ -86,8 +80,8 @@ onMounted(async () => {
             </div>
             <!-- Checkboxes for tasks -->
             <div v-if="itemType === 'tasks'" class="select-none margin-top margin-bottom m-md">
-                <p for="project" class="text-center block font-xxl margin-top m-md margin-bottom">TECHNOLOGIES</p>
-                <div class="flex justify-center align-start wrap gap-md">
+                <p class="text-center block font-xxl margin-top m-md margin-bottom">TECHNOLOGIES</p>
+                <div class="flex justify-center align-start wrap gap-md width-50 margin-left margin-right m-auto">
                     <div v-for="technology in technologies">
                         <label :for="technology.name" class="checkbox font-xxl padding p-xs" @click="labelAsCheckbox($event.target as HTMLElement)">{{ technology.name }}</label>
                         <input type="checkbox" :name="technology.name" :value="technology.name" class="hidden">

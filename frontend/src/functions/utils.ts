@@ -1,5 +1,7 @@
 import router from "../router";
+import emitter from "../types/emitter";
 import type { ProjectDTO, TaskDTO, TechnologyDTO } from "../types/ItemData";
+import { MessageType } from "../types/types";
 export async function filterDataByStatus(data: TaskDTO[] | ProjectDTO[], status: number) : Promise<TaskDTO[] | ProjectDTO[]>{
     return data.filter(item => item.status == status)
 }
@@ -43,18 +45,17 @@ export function truncateText(text: string, maxLength: number): string {
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 }
 
-export function processResponseStatus(status: number, onSuccess?: () => void, onError?: () => void, onMissing?: () => void) {
+export function processResponseStatus(status: number, onSuccess?: () => void) {
     switch(status) {
         case 200:
             onSuccess?.()
-            break
-        case 404:
-            onMissing?.()
-            break
-        case 400:
-            onError?.()
-            break
+            break            
     }
+}
+export function processResponseError(status: number, message: string)
+{
+    console.error(`${status}: ${message}`)
+    emitter.emit("showNotification", {messageType: MessageType.error, message: `${status}: ` + message || "Something unexpected happened"})
 }
 
 export async function generateExportJSON(projects?: ProjectDTO[], technologies?: TechnologyDTO[], tasks?: TaskDTO[]) : Promise<{

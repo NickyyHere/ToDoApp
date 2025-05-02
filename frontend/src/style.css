@@ -462,11 +462,14 @@ a:hover {
 select, input, textarea {
   background-color: var(--bg-color);
   color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
 }
 .checkbox {
   cursor: pointer;
   transition: .3s;
   border: 1px solid var(--border-color);
+  border-radius: 10px;
 }
 .checkbox:hover {
   border-color: var(--accent-color);
@@ -492,6 +495,7 @@ button:hover {
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 3;
   background-color: #000000af;
 }
 .cover-item {
