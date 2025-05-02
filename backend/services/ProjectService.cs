@@ -63,6 +63,10 @@ namespace ToDoApp.services
             var projects = await _projectRepository.GetAllAsync();
             return _projectMapper.ToDTO(projects);
         }
+        public async Task<ProjectDTO> GetProjectAsync(int id)
+        {
+            return _projectMapper.ToDTO(await _projectRepository.GetByIdAsync(id));
+        }
         private async Task<List<TodoItem>> GetProjectTasksAsync(Project project)
         {
             var tasks = await _todoRepository.GetAllAsync();
@@ -76,7 +80,6 @@ namespace ToDoApp.services
             }
             return projectTasks;
         }
-
         public async Task ImportAsync(ProjectDTO dto)
         {
             await _projectRepository.AddAsync(_projectFactory.Build(dto));

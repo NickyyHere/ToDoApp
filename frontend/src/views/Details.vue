@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { changeProjectStatus, changeTaskStatus, deleteProject, deleteTask, fetchProjects, fetchTechnologies } from '../functions/communication'
-import type { ProjectDTO, TechnologyDTO } from '../types/ItemData'
+import { changeProjectStatus, changeTaskStatus, deleteProject, deleteTask, fetchProject, fetchProjects, fetchTask, fetchTechnologies } from '../functions/communication'
+import type { ProjectDTO, TaskDTO, TechnologyDTO } from '../types/ItemData'
 import { isTaskData, labelAsCheckbox, processResponseStatus, redirect, statusToText } from '../functions/utils'
 import { sendForm } from '../functions/form_utils'
 import { Action, MessageType, Type } from '../types/types'
 import emitter from '../types/emitter'
 
 const route = useRoute()
-const raw = route.query.data as string
-const data = raw ? JSON.parse(raw) : null
+const type = route.params.type as Type
+const id = parseInt(route.params.id as string)
+
+const data = ref<TaskDTO | ProjectDTO>({} as TaskDTO)
 
 const isEditing = ref<boolean>(false)
 const checkedTechnologies = ref<string[]>([])
@@ -18,8 +20,8 @@ const checkedTechnologies = ref<string[]>([])
 const projects =  ref<ProjectDTO[]>([])
 const technologies = ref<TechnologyDTO[]>([])
 
-const startDate = new Date((data?.startDate) as string)
-const finishDate = data?.finishDate == null ? "ONGOING" : new Date(data.finishDate).toLocaleDateString()
+const startDate = ref<string>('')
+const finishDate = ref<string>('')
 
 const confimation = ref<string>('')
 const confirmationResult = ref<string | null>(null)
@@ -31,15 +33,17 @@ const onMissing = () => {
     emitter.emit("showNotification", {messageType: MessageType.error, message: "Coulnd't find resource"})
 }
 
-const formData = ref({
-    name: data?.name || "",
-    description: data?.description || "",
+const formData = ref<{
+    name: string
+    description: string
+    projectId: number
+    technologyNames: string[]
+}>({ // If this is not here it throws a lot of "formData may be undefined", this is filled in onMounted
+    name: '',
+    description: '',
     projectId: -1,
-    technologyNames: new Array<string>
+    technologyNames: []
 })
-
-const id = data.id
-const type = isTaskData(data) ? Type.task : Type.project
 
 const handleDelete = async () => {
     let status: number
@@ -57,6 +61,8 @@ const handleDelete = async () => {
         case Type.task:
             status = await deleteTask(id)
             break
+        default:
+            status = 400
     }
     processResponseStatus(status, onSuccess, onError, onMissing)
 }
@@ -64,7 +70,7 @@ const handleChangeStatus = async() => {
     let status: number
     const onSuccess = () => {
         blockStatusChange.value = true
-        data.status += 1
+        data.value.status += 1
         emitter.emit("showNotification", {messageType: MessageType.success, message: "Item status changed"})
     }
     const onError = () => {
@@ -77,6 +83,8 @@ const handleChangeStatus = async() => {
         case Type.task:
             status = await changeTaskStatus(id)
             break
+        default:
+            status = 400
     }
     processResponseStatus(status, onSuccess, onError, onMissing)
 }
@@ -90,13 +98,22 @@ const handleUpdate = async() => {
         emitter.emit("showNotification", {messageType: MessageType.error, message: "Failed updating item"})
     }
     formData.value.technologyNames = checkedTechnologies.value
-    status = await sendForm(Action.update, type, formData.value, data?.id)
+    status = await sendForm(Action.update, type, formData.value, data.value?.id)
     processResponseStatus(status, onSuccess, onError, onMissing)
 }
 
 onMounted(async () => {
     projects.value = await fetchProjects()
     technologies.value = await fetchTechnologies()
+    data.value = type == Type.task ? await fetchTask(id) : await fetchProject(id)
+    formData.value = {
+        name: data.value.name || "",
+        description: data.value?.description || "",
+        projectId: isTaskData(data.value) ? data.value.projectId : -1,
+        technologyNames: new Array<string>
+    }
+    startDate.value = data.value.startDate == null ? "NEW" : new Date(data.value.startDate).toLocaleDateString()
+    finishDate.value = data.value.finishDate == null ? "ONGOING" : new Date(data.value.finishDate).toLocaleDateString()
 })
 </script>
 <template>
@@ -119,10 +136,9 @@ onMounted(async () => {
         <!-- If editing: header -->
         <div v-if="isEditing">
             <h2>
-                {{ isTaskData(data) ? "TASK" : "PROJECT" }} #{{ data?.id }}
+                {{ isTaskData(data) ? "TASK" : "PROJECT" }} #{{ data.id }}
             </h2>
         </div>
-        <!-- on submit call sendForm() -->
         <form @submit.prevent="handleUpdate">
             <!-- If editing, input for name -->
             <div v-if="isEditing">
@@ -133,7 +149,7 @@ onMounted(async () => {
             </div>
             <!-- If viewing details, show Name#Id -->
             <div v-else>
-                <h2>{{ data?.name }}<span class="absolute text-color-muted">#{{ data?.id }}</span></h2>
+                <h2>{{ data.name }}<span class="absolute text-color-muted">#{{ data.id }}</span></h2>
             </div>
             <!-- If editing, and viewed item is a task, select for project THE VALUE IS A STRING FFS WHY AM I RETARDED -->
             <div v-if="isEditing">
@@ -146,7 +162,7 @@ onMounted(async () => {
             </div>
             <!-- If viewing details for a task, show project name -->
             <div v-else>
-                <p v-if="isTaskData(data)" class="font-xl">{{ data?.projectName }}</p>
+                <p v-if="isTaskData(data)" class="font-xl">{{ data.projectName }}</p>
             </div>
             <!-- If editing, textarea for description -->
             <div v-if="isEditing">
@@ -159,7 +175,7 @@ onMounted(async () => {
             <div v-else class="margin-top m-md">
                 <hr>
                 <h3>DESCRIPTION</h3>
-                <p class="text-justify padding p-lg width-40 margin-left margin-right m-auto">{{ data?.description }}</p>
+                <p class="text-justify padding p-lg width-40 margin-left margin-right m-auto">{{ data.description }}</p>
                 <hr>
             </div>
             <!-- If editing task, checkboxes for technologies -->
@@ -177,7 +193,7 @@ onMounted(async () => {
             <!-- If viewing details show technologies -->
             <div v-else>
                 <div v-if="isTaskData(data)" class="flex justify-center margin-top m-md gap-sm wrap">
-                    <div v-for="technology in data?.technologies" class="border rounded padding p-xs font-xl">{{ technology }}</div>
+                    <div v-for="technology in data.technologies" class="border rounded padding p-xs font-xl">{{ technology }}</div>
                 </div>
             </div>
             <!-- Buttons if editing -->
@@ -188,16 +204,16 @@ onMounted(async () => {
             <!-- If not editing -->
             <div v-else >
                 <!-- Item status -->
-                <p class="margin-top m-md font-xl">{{ statusToText(data?.status) }}
+                <p class="margin-top m-md font-xl">{{ statusToText(data.status) }}
                     <!-- Button to change status -->
-                    <button type="button" @click="handleChangeStatus" class="absolute move margin-left m-xl padding p-xs" v-if="data?.status < 2 && !blockStatusChange">
-                        Move to {{ statusToText(data?.status + 1) }}
+                    <button type="button" @click="handleChangeStatus" class="absolute move margin-left m-xl padding p-xs" v-if="data.status < 2 && !blockStatusChange">
+                        Move to {{ statusToText(data.status + 1) }}
                     </button>
                 </p>
                 <!-- Start - Finish date -->
-                <p class="margin-top m-md font-xl">{{ startDate.toLocaleDateString() }} - {{ finishDate }}</p>
+                <p class="margin-top m-md font-xl" v-if="data.startDate">{{ startDate }} - {{ finishDate }}</p>
                 <!-- Buttons -->
-                <div class="margin-top m-xl flex justify-center gap-sm" v-if="data?.status < 2">
+                <div class="margin-top m-xl flex justify-center gap-sm" v-if="data.status < 2">
                     <button class="padding p-xs font-xxl" type="button" @click="isEditing=true">EDIT</button>
                     <button class="padding p-xs font-xxl" type="button" @click="viewConfirmation=true">DELETE</button>
                 </div>

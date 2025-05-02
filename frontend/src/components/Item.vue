@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { redirect, isTaskData } from '../functions/utils';
+import { redirect, isTaskData, truncateText } from '../functions/utils';
 import type { TaskDTO, ProjectDTO } from '../types/ItemData';
+import { Type } from '../types/types';
     const props = defineProps<{
         itemData: TaskDTO | ProjectDTO
     }>()
@@ -9,12 +10,12 @@ import type { TaskDTO, ProjectDTO } from '../types/ItemData';
 </script>
 <template>
     <div class="bg-surface border rounded itemWrapper">
-        <div class="item" @click="redirect({url: '/details', props: props.itemData})">
+        <div class="item" @click="redirect({url: `/details/${isTaskData(props.itemData) ? Type.task : Type.project}/${props.itemData.id}`})">
             <p class="text-center font-xxl">{{ itemData.name }}</p>
-            <p class="text-center" v-if="isTaskData(itemData)">{{ itemData.projectName }}</p>
+            <p class="text-center" v-if="isTaskData(props.itemData)">{{ props.itemData.projectName }}</p>
             <hr class="margin m-xs">
-            <p class="font-sm">{{ itemData.description }}</p>
-            <p class="text-center">{{ startDate }} - {{ finishDate }}</p>
+            <p class="font-sm">{{ truncateText(itemData.description, 50) }}</p>
+            <p class="text-center">{{ startDate }}<span v-if="props.itemData.startDate"> - {{ finishDate }}</span></p>
         </div>
     </div>
 </template>

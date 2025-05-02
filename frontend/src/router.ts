@@ -9,7 +9,7 @@ import Data from './views/Data.vue';
 const routes: Array<RouteRecordRaw> = 
 [
   {path: "/", component: Todo },
-  {path: "/details", component: Details},
+  {path: "/details/:type/:id", component: Details},
   {path: "/add-new", component: AddNew},
   {path: "/statistics", component: Statistics},
   {path: "/data", component: Data} 

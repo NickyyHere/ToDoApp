@@ -34,6 +34,10 @@ namespace ToDoApp.services
             var items = await _todoRepository.GetAllAsync();
             return _taskMapper.ToDTO(items);
         }
+        public async Task<TodoItemDTO> GetTodoItemAsync(int id)
+        {
+            return _taskMapper.ToDTO(await _todoRepository.GetByIdAsync(id));
+        }
         public async Task UpdateTaskAsync(CreateTodoItemDTO createTodoItemDTO, int id)
         {
             var todoItem = await _todoRepository.GetByIdAsync(id);

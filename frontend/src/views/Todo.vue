@@ -1,47 +1,42 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
 import Column from '../components/Column.vue'
 import { filterDataByStatus, redirect } from '../functions/utils'
 import type { ProjectDTO, TaskDTO } from '../types/ItemData'
 import { Type } from '../types/types'
 import { fetchProjects, fetchTasks } from '../functions/communication'
 
-const route = useRoute()
-const raw = route.query.data as string
-const notificationData = raw ? JSON.parse(raw) as {notification: string} : null
-
-const notification = ref<string | null>('')
 const fetchType = ref<Type.task | Type.project>(Type.task)
+
+const projectData = ref<ProjectDTO[]>([])
+const taskData = ref<TaskDTO[]>([])
 
 const newItems = ref<TaskDTO[] | ProjectDTO[]>([])
 const inProgressItems = ref<TaskDTO[] | ProjectDTO[]>([])
 const finishedItems = ref<TaskDTO[] | ProjectDTO[]>([])
 
-watch(fetchType, async(newType) => {
-    let data
-    switch(newType) {
-        case Type.project:
-            data = await fetchProjects()
-            break
-        case Type.task:
-            data = await fetchTasks()
-            break
-    }
-    newItems.value = await filterDataByStatus(data, 0)
-    inProgressItems.value = await filterDataByStatus(data, 1)
-    finishedItems.value = await filterDataByStatus(data, 2)
-}, {immediate: true})
 
 const switchFetchType = () => {
     fetchType.value = fetchType.value == Type.task ? Type.project : Type.task
 }
 
-onMounted(() => {
-    if(notificationData != null) {
-        notification.value = notificationData.notification
-        setTimeout(() => {notification.value = null}, 3000)
-    }
+onMounted(async() => {
+    taskData.value = await fetchTasks()
+    projectData.value = await fetchProjects()
+    watch(fetchType, async(newType) => {
+        let data
+        switch(newType) {
+            case Type.project:
+                data = projectData.value
+                break
+            case Type.task:
+                data = taskData.value
+                break
+        }
+        newItems.value = await filterDataByStatus(data, 0)
+        inProgressItems.value = await filterDataByStatus(data, 1)
+        finishedItems.value = await filterDataByStatus(data, 2)
+    }, {immediate: true})
 })
 </script>
 <template>

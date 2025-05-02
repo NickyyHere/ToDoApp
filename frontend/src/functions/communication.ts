@@ -12,6 +12,16 @@ async function fetchItems(type: Type) {
     }
 }
 
+async function fetchItem(type: Type, id: number) {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/todo/${type}/${id}`)
+        return response.data
+    } catch(error) {
+        console.error(`Error fetching data: ${error}`)
+        return []
+    }
+}
+
 async function addNewItem(type: Type, data: CreateTaskDTO | CreateProjectDTO | CreateTechnologyDTO) {
     try {
         let url = `http://localhost:5000/api/todo/${type}`
@@ -85,6 +95,12 @@ export async function fetchProjects() : Promise<ProjectDTO[]> {
 }
 export async function fetchTechnologies() : Promise<TechnologyDTO[]> {
     return fetchItems(Type.technology)
+}
+export async function fetchTask(id: number) : Promise<TaskDTO> {
+    return fetchItem(Type.task, id)
+}
+export async function fetchProject(id: number) : Promise<ProjectDTO> {
+    return fetchItem(Type.project, id)
 }
 export async function addNewTask(data: CreateTaskDTO) : Promise<number> {
     return await addNewItem(Type.task, data) as number

@@ -24,20 +24,42 @@ namespace ToDoApp.controllers
         [HttpGet("tasks")]
         public async Task<IActionResult> GetItems() 
         {
-            var items = await _todoService.GetTodoItemsAsync();
-            return Ok(items);
+            return Ok(await _todoService.GetTodoItemsAsync());
         }
         [HttpGet("projects")]
         public async Task<IActionResult> GetProjects()
         {
-            var projects = await _projectService.GetProjectsAsync();
-            return Ok(projects);
+            return Ok(await _projectService.GetProjectsAsync());
         }
         [HttpGet("technologies")]
         public async Task<IActionResult> GetTechnologies()
         {
-            var technologies = await _technologyService.GetTechnologiesAsync();
-            return Ok(technologies);
+            return Ok(await _technologyService.GetTechnologiesAsync());
+        }
+        [HttpGet("tasks/{id}")]
+        public async Task<IActionResult> GetItem([FromRoute] int id)
+        {
+            try
+            {
+                return Ok(await _todoService.GetTodoItemAsync(id));
+            }
+            catch(ItemNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            
+        }
+        [HttpGet("projects/{id}")]
+        public async Task<IActionResult> GetProject([FromRoute] int id)
+        {
+            try
+            {
+                return Ok(await _projectService.GetProjectAsync(id));
+            }
+            catch(ItemNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
         }
         [HttpPost("tasks")]
         public async Task<IActionResult> AddTask([FromBody] CreateTodoItemDTO data)

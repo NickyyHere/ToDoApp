@@ -6,6 +6,7 @@ namespace ToDoApp.services.interfaces
     public interface IProjectService
     {
             Task<List<ProjectDTO>> GetProjectsAsync();
+            Task<ProjectDTO> GetProjectAsync(int id);
             Task AddProjectAsync(CreateProjectDTO createProjectDTO);
             Task UpdateProjectAsync(CreateProjectDTO createProjectDTO, int id);
             Task DeleteProjectAsync(int id);

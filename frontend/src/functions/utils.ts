@@ -11,7 +11,7 @@ export function redirect(options: string | { url: string, props?: any }) {
       const query = options.props ? { data: JSON.stringify(options.props) } : undefined
       router.push({ path: options.url, query })
     }
-  }
+}
 
 export function isTaskData(obj: any) : obj is TaskDTO {
     return (
@@ -54,6 +54,10 @@ export function statusToText(status: number) : string {
         default:
             return "UNKNOWN"
     }
+}
+
+export function truncateText(text: string, maxLength: number): string {
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 }
 
 export function processResponseStatus(status: number, onSuccess?: () => void, onError?: () => void, onMissing?: () => void) {
